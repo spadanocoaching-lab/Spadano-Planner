@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#142038">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Spadano">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Spadano Planner</title>
+<style>
+  :root{
+    --navy:#142038; --navy2:#0E1830; --navybox:#1B2C4A;
+    --orange:#E8701A; --orange2:#F26522;
+    --cream:#FAF6EF; --panel:#F3EEE3; --bg:#EFEAE0;
+    --ink:#23232E; --grey:#6A6456; --line:#E2DCCB; --green:#27795B;
+    --white:#fff;
+    --maxw:520px;
+    --safe-top:env(safe-area-inset-top,0px);
+    --safe-bot:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    overscroll-behavior-y:contain;
+  }
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 12px;
+        padding-top:calc(12px + var(--safe-top));
+        padding-bottom:calc(96px + var(--safe-bot));}
+  button{font-family:inherit;cursor:pointer;border:none;background:none}
+  input,textarea,select{font-family:inherit;font-size:16px}/* 16px = no zoom iOS */
+
+  /* ---------- HEADER ---------- */
+  .hdr{background:var(--navy);border-radius:18px;padding:16px 18px;margin:6px 0 12px;
+       position:relative;overflow:hidden}
+  .hdr::before{content:"";position:absolute;inset:0;
+    background-image:linear-gradient(#23314F 1px,transparent 1px),linear-gradient(90deg,#23314F 1px,transparent 1px);
+    background-size:34px 34px;opacity:.5}
+  .hdr-row{position:relative;display:flex;align-items:center;justify-content:space-between}
+  .hdr h1{font-size:22px;font-weight:800;letter-spacing:-.5px;color:#fff;margin:0;text-transform:uppercase}
+  .hdr h1 span{color:var(--orange)}
+  .hdr .rule{height:3px;width:52px;background:var(--orange);border-radius:2px;margin:8px 0 6px;position:relative}
+  .hdr .sub{position:relative;font-size:12px;color:#B9C3D8}
+  .gear{position:relative;width:38px;height:38px;border-radius:11px;background:#23314F;
+        display:flex;align-items:center;justify-content:center;color:#B9C3D8;font-size:18px}
+
+  /* ---------- TABS ---------- */
+  .tabs{display:flex;gap:6px;margin-bottom:12px}
+  .tab{flex:1;text-align:center;padding:10px 0;border-radius:12px;font-size:12.5px;font-weight:800;
+       letter-spacing:.4px;text-transform:uppercase;border:1px solid var(--line);background:#FFFDF8;color:var(--navy)}
+  .tab.on{background:var(--orange);color:#fff;border-color:var(--orange)}
+
+  /* ---------- CARDS ---------- */
+  .card{border-radius:14px;background:#FFFDF8;border:1px solid var(--line);padding:13px;margin-bottom:12px}
+  .banner{border-radius:13px;padding:11px 13px;margin-bottom:12px;background:var(--navy2)}
+  .banner .k{font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--orange);margin-bottom:4px}
+  .banner .t{font-size:12px;color:#fff;line-height:1.5}
+  .banner b{color:#fff}
+  .alert{border-radius:13px;padding:11px 13px;margin-bottom:12px;display:flex;gap:8px;align-items:center;
+         background:#FBEFE2;border:1px solid var(--orange);color:var(--navy);font-size:12.5px;font-weight:700}
+
+  .sec-line{height:3px;width:46px;background:var(--orange);border-radius:2px;margin-bottom:8px}
+  .sec-title{font-size:16px;font-weight:800;letter-spacing:-.4px;text-transform:uppercase;color:var(--navy)}
+  .sec-sub{font-size:12px;line-height:1.35;color:#6E6755;margin-top:1px}
+
+  /* ---------- DAY CARD ---------- */
+  .day{border-radius:13px;overflow:hidden;background:#FFFDF8;border:1px solid var(--line);
+       border-left:5px solid var(--navy);margin-bottom:12px}
+  .day.today{border:2px solid var(--orange);border-left:5px solid var(--orange)}
+  .day-head{padding:10px 13px}
+  .day-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .day-tags{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .day-lab{font-size:15px;font-weight:800;letter-spacing:-.3px;color:var(--navy)}
+  .badge{font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px;color:#fff}
+  .badge.lt{background:#EFE8D8;color:var(--navy)}
+  .day-prog{font-size:11px;font-weight:800;color:var(--grey)}
+  .day-prog.done{color:var(--green)}
+  .day-title{font-size:13px;font-weight:700;margin-top:3px;line-height:1.3;color:var(--ink)}
+  .chips{margin-top:6px}
+  .chip{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10.5px;font-weight:800;
+        letter-spacing:.3px;text-transform:uppercase;margin:0 5px 4px 0;background:#EFE8D8;color:var(--navy)}
+  .chip.dark{background:var(--navy);color:#fff}
+  .day-body{padding:0 13px 13px}
+  .nota{font-size:12px;margin-bottom:8px;padding:8px 10px;border-radius:9px;background:#EFE8D8;color:var(--navy);line-height:1.35}
+
+  /* ---------- COPY BLOCK ---------- */
+  .copy{margin-bottom:8px;border-radius:9px;overflow:hidden;border:1px solid var(--line)}
+  .copy-h{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:#EFE8D8}
+  .copy-h span{font-size:11px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:var(--navy)}
+  .copy-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;font-size:11.5px;font-weight:800;background:var(--orange);color:#fff}
+  .copy-btn.ok{background:var(--green)}
+  .copy pre{margin:0;padding:9px 11px;font-size:12.5px;line-height:1.5;white-space:pre-wrap;word-break:break-word;background:var(--cream);color:var(--ink);font-family:inherit}
+
+  .lbl{font-size:11px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:var(--navy);margin-bottom:4px}
+  .story-li{font-size:12.5px;line-height:1.35;padding:2px 0;display:flex;gap:6px;color:var(--ink)}
+  .story-li .n{color:var(--orange);font-weight:800}
+
+  /* ---------- CHECK ROW ---------- */
+  .chk{display:flex;align-items:flex-start;gap:8px;padding:6px 0}
+  .box{margin-top:2px;width:19px;height:19px;flex:0 0 auto;border-radius:6px;border:2px solid #C9BFA9;display:flex;align-items:center;justify-content:center}
+  .box.on{background:var(--orange);border-color:var(--orange)}
+  .box.on::after{content:"✓";color:#fff;font-size:13px;font-weight:900;line-height:1}
+  .chk .x{font-size:13px;line-height:1.35;color:var(--ink)}
+  .chk.done .x{color:var(--grey);text-decoration:line-through}
+  .chk.dark .x{color:#fff}
+  .chk.dark.done .x{color:#7E89A3}
+  .chk.dark .box{border-color:#5A6680}
+
+  /* ---------- FIRST HOUR / GROWTH ---------- */
+  .navycard{border-radius:13px;padding:12px 13px;margin-bottom:12px;background:var(--navy)}
+  .navycard .nh{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .navycard .nh .t{font-size:13px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:#fff}
+  .navycard .nh .p{font-size:11px;font-weight:800;margin-left:auto;color:#B9C3D8}
+  .navycard .nh .p.done{color:#7BD3A8}
+  .navycard .desc{font-size:11px;margin-bottom:6px;color:#B9C3D8}
+
+  /* ---------- DATI ---------- */
+  .row2{display:flex;gap:8px;margin-bottom:8px}
+  .inp{width:100%;padding:8px 10px;border-radius:8px;font-size:16px;border:1px solid #C9BFA9;background:var(--cream);color:var(--ink)}
+  table.metrics{width:100%;border-collapse:collapse}
+  table.metrics th{font-size:10.5px;font-weight:800;text-transform:uppercase;color:var(--navy);padding:4px 2px}
+  table.metrics th.l{text-align:left;padding-left:0}
+  table.metrics td{padding:2px}
+  table.metrics td.l{font-size:11.5px;color:var(--ink);padding-right:4px}
+  .mini{width:100%;padding:6px 2px;border-radius:6px;font-size:15px;text-align:center;border:1px solid #DDD3BE;background:var(--cream);color:var(--ink)}
+  .dot{width:12px;height:12px;border-radius:99px;display:inline-block}
+  .insights{margin-top:8px;padding:8px 10px;border-radius:9px;background:#EFE8D8}
+  .insights div{font-size:11.5px;line-height:1.35;color:var(--navy)}
+  .reset{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:13px;padding:11px;font-size:12.5px;font-weight:700;background:#EFE8D8;color:#8A8A8A;border:1px solid var(--line)}
+  .reset.arm{background:#C0392B;color:#fff}
+
+  /* ---------- FOOTER NAV (bottom bar) ---------- */
+  .footnote{font-size:11px;color:var(--grey);text-align:center;margin:6px 0 0}
+
+  /* ---------- EDITOR / FAB ---------- */
+  .fab{position:fixed;right:calc(50% - var(--maxw)/2 + 16px);bottom:calc(20px + var(--safe-bot));
+       width:54px;height:54px;border-radius:50%;background:var(--orange);color:#fff;font-size:26px;
+       display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(232,112,26,.45);z-index:40}
+  @media(max-width:540px){.fab{right:16px}}
+  .sheet-bg{position:fixed;inset:0;background:rgba(10,16,30,.55);z-index:50;display:none}
+  .sheet-bg.show{display:block}
+  .sheet{position:fixed;left:0;right:0;bottom:0;max-width:var(--maxw);margin:0 auto;
+         background:var(--cream);border-radius:18px 18px 0 0;z-index:60;max-height:92vh;overflow-y:auto;
+         transform:translateY(100%);transition:transform .25s ease;
+         padding:16px 16px calc(24px + var(--safe-bot))}
+  .sheet.show{transform:translateY(0)}
+  .sheet-grip{width:40px;height:4px;border-radius:2px;background:#CDC5B4;margin:0 auto 14px}
+  .sheet h2{font-size:18px;font-weight:800;color:var(--navy);margin:0 0 4px;text-transform:uppercase;letter-spacing:-.3px}
+  .sheet .hint{font-size:12px;color:var(--grey);margin-bottom:14px;line-height:1.4}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--navy);margin-bottom:5px}
+  .field input,.field textarea,.field select{width:100%;padding:10px 11px;border-radius:9px;border:1px solid #C9BFA9;background:#fff;color:var(--ink);font-size:16px}
+  .field textarea{min-height:90px;resize:vertical;line-height:1.45}
+  .field .help{font-size:11px;color:var(--grey);margin-top:4px;line-height:1.35}
+  .btn-pri{width:100%;padding:13px;border-radius:11px;background:var(--orange);color:#fff;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.4px}
+  .btn-sec{width:100%;padding:11px;border-radius:11px;background:#EFE8D8;color:var(--navy);font-size:13px;font-weight:700;margin-top:8px}
+  .btn-del{width:100%;padding:11px;border-radius:11px;background:#fff;color:#C0392B;border:1px solid #E8C9C4;font-size:13px;font-weight:700;margin-top:8px}
+  .copy-list-item{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;padding:10px;background:#fff;border:1px solid var(--line);border-radius:9px}
+  .copy-list-item .grow{flex:1}
+  .mini-act{font-size:11px;font-weight:800;color:var(--orange);padding:4px 8px;border-radius:6px;background:#FBEFE2}
+  .edit-pill{font-size:11px;font-weight:800;color:var(--orange);background:#FBEFE2;padding:5px 10px;border-radius:8px;border:1px solid #F2D9C4}
+  .seg{display:flex;gap:6px;background:#EFE8D8;padding:4px;border-radius:11px;margin-bottom:14px}
+  .seg button{flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:800;color:var(--grey);text-transform:uppercase;letter-spacing:.3px}
+  .seg button.on{background:#fff;color:var(--navy)}
+  .empty{text-align:center;padding:34px 16px;color:var(--grey);font-size:13px;line-height:1.5}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + var(--safe-bot));
+         background:var(--navy);color:#fff;padding:10px 18px;border-radius:99px;font-size:13px;font-weight:700;
+         z-index:80;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .update-bar{position:fixed;left:0;right:0;bottom:0;max-width:var(--maxw);margin:0 auto;background:var(--orange);color:#fff;
+              padding:12px 16px calc(12px + var(--safe-bot));display:none;align-items:center;justify-content:space-between;z-index:70;font-size:13px;font-weight:700}
+  .update-bar.show{display:flex}
+  .update-bar button{background:#fff;color:var(--orange);padding:7px 14px;border-radius:8px;font-weight:800;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<button class="fab" id="fab" aria-label="Aggiungi">＋</button>
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+<div class="update-bar" id="updateBar">
+  <span>Disponibile una versione aggiornata.</span>
+  <button onclick="location.reload()">Ricarica</button>
+</div>
+<script>
+/* ============================================================
+   SPADANO PLANNER — PWA
+   Dati seed = piano v6. L'utente può modificare/aggiungere dal telefono.
+   Persistenza: localStorage (resta sul dispositivo).
+   ============================================================ */
+(function(){
+"use strict";
+
+// ---------- COSTANTI ----------
+var PILLARS = {
+  storia:{c:"#2E6DA4",n:"STORIA"}, ferro:{c:"#C0392B",n:"FERRO"},
+  verita:{c:"#7D3C98",n:"VERITÀ"}, salute:{c:"#27795B",n:"SALUTE"},
+  identita:{c:"#142038",n:"IDENTITÀ"}, lancio:{c:"#B8791F",n:"LANCIO"},
+  riposo:{c:"#8A8A8A",n:"STORIES"}
+};
+var PILLAR_KEYS = Object.keys(PILLARS);
+var STORE_KEY = "spadano_pwa_state_v1";
+var SEED_VERSION = 6; // alza questo numero se cambi il SEED e vuoi rieffettuare il merge
+
+// ---------- DATI SEED (piano v6) ----------
+var SEED = {
+  meta:{ title:"Piano v7", subtitle:"15 giugno → 13 luglio · l'arco completo",
+         triggers:"<b>GUIDA</b> sempre · <b>LISTA</b> 20–24/6 · <b>IKIGAI</b> dal 25/6 · <b>PERCORSO</b> dal 6/7" },
+  retro:[
+    {id:"r0",lab:"Campo NOME del profilo",copy:"Alessandro | Ricomposizione Corporea"},
+    {id:"r1",lab:"Bio nuova (3 righe)",copy:"Ricomposizione corporea per uomini 28–45\nDa padre fuori forma a natural bodybuilder\nScrivimi GUIDA → guida gratuita per ripartire"},
+    {id:"r2",lab:"3 post fissati: ① Chi sono · ② Reel più condiviso · ③ «Per chi è» — dal 25/6 il ③ diventa il post di apertura"},
+    {id:"r3",lab:"Primo commento → reel «+25 kg»",copy:"Io: +25 kg senza accorgermene. Tu quanti ne hai messi su\nda quando hai smesso? Scrivi il numero 👇"},
+    {id:"r4",lab:"Primo commento → reel «Il giorno in cui ho deciso»",copy:"Il mio momento: mio figlio in braccio, io senza fiato.\nIl tuo c'è già stato? SÌ o NON ANCORA 👇"},
+    {id:"r5",lab:"Primo commento → reel «Le 6 del mattino»",copy:"Per me le 6:00, per non togliere tempo a nessuno.\nTu: MATTINA o SERA? 👇"},
+    {id:"r6",lab:"Caption reel Range completo → domanda finale",copy:"Sii onesto: fai sempre la ripetizione intera? SÌ o NO 👇"},
+    {id:"r7",lab:"Caption reel Eccentrica → domanda finale",copy:"Quanti secondi dura la tua discesa? Scrivi il numero (vale anche 0) 👇"},
+    {id:"r8",lab:"Caption reel Macchine → domanda finale",copy:"Tu da che parte stai: MACCHINE o PESI LIBERI? 👇"},
+    {id:"r9",lab:"Caption reel Riscaldamento → domanda finale",copy:"Ti scaldi prima di allenarti? SEMPRE o MAI 👇"},
+    {id:"r10",lab:"2 cover fuori brand → rifare su System A navy"}
+  ],
+  weeks:[
+    { n:2, title:"Chiusura Settimana 2 — Tecnica",
+      goal:"Si chiude la settimana del ferro. Da sabato parte il trigger a commento: GUIDA.",
+      hash:"#spadanocoaching #naturalbb #ricomposizionecorporea #tecnica #over35 #allenamentonatural",
+      days:[
+        {id:"d12",date:"2026-06-12",lab:"VEN 12",type:"REEL",time:"20:00",pillar:"ferro",
+         title:"Mente-muscolo: perché non «senti» il muscolo",
+         nota:"Script e caption: planner v5, invariati. Aggiorna solo la domanda finale e fissa il primo commento.",
+         q:"SENTO o SPOSTO?",cta:"Salva e provalo",
+         copy:[{l:"Domanda finale caption",t:"Lo senti davvero il muscolo o sposti il peso? SENTO o SPOSTO 👇"},
+               {l:"Primo commento (fissalo)",t:"Test veloce: l'ultima serie di ieri l'hai SENTITA o l'hai SPOSTATA? 👇"}],
+         stories:["Clip: contrazione di picco tenuta in cima","Box domande: «Su quale esercizio non senti mai il muscolo?»","Reshare reel mente-muscolo"],
+         tasks:["Pubblicato ore 20:00","Domanda caption aggiornata","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi scrive"]},
+        {id:"d13",date:"2026-06-13",lab:"SAB 13",type:"CAROSELLO",time:"11:00",pillar:"salute",
+         title:"Tornare in palestra dopo anni di stop senza farti male",
+         nota:"Slide 1–7: planner v5 invariate. Slide 8 e caption: NUOVE — CTA «Commenta GUIDA».",
+         q:"Da quanti anni non ti alleni? (numero)",cta:"Commenta GUIDA",
+         copy:[{l:"Slide 8 — nuovo testo",t:"Vuoi il rientro completo, passo per passo?\nCommenta GUIDA 👇 e ti mando gratis\n«Ritorno in Forma Dopo i 30»."},
+               {l:"Caption nuova",t:"Torni in palestra dopo anni? Leggi questo prima di farti male.\n\nL'errore più grande: ripartire da dove avevi lasciato dieci anni fa.\nIl corpo non è quello, e pretenderlo è la via più rapida\nverso l'infortunio e l'ennesimo abbandono.\n\nIl rientro giusto: carichi leggeri all'inizio, tecnica prima di tutto,\nriscaldamento sempre, costanza al posto dell'intensità da eroe.\n\nTutto il rientro è nella mia guida gratuita\n«Ritorno in Forma Dopo i 30»: commenta GUIDA 👇 e te la mando.\n\nDa quanti anni non ti alleni? Scrivi il numero."},
+               {l:"Primo commento (fissalo)",t:"Io sono ripartito da +25 kg, presi un chilo alla volta.\nTu da quanti anni sei fermo? Scrivi il numero 👇"}],
+         stories:["Reshare carosello: «Salvatelo se ricominci»","Sondaggio: «L'errore del rientro l'hai fatto anche tu?» → Sì / No"],
+         tasks:["Slide 8 aggiornata su Canva","Pubblicato ore 11:00","Primo commento fissato","Prima ora completata","Stories del giorno","DM + guida a chi commenta GUIDA"]},
+        {id:"d14",date:"2026-06-14",lab:"DOM 14",type:"STORIES",time:"",pillar:"riposo",
+         title:"Riposo — solo stories",copy:[],
+         stories:["Storia riposo + scorcio della settimana vera (lavoro → famiglia → palestra)","Sondaggio: «Esercizio preferito: SPINTA o TIRATA?»"],
+         tasks:["Stories pubblicate","DM a chi vota / risponde"]}
+      ]},
+    { n:3, title:"Le verità che nessuno dice",
+      goal:"Diventare quello di cui ci si fida perché è onesto. GUIDA · da sabato 20 parte LISTA. Se devi saltare un reel, salta giovedì.",
+      hash:"#spadanocoaching #naturalbb #ricomposizionecorporea #verità #over40 #allenamentonatural #fitnessover35",
+      days:[
+        {id:"d15",date:"2026-06-15",lab:"LUN 15",type:"REEL",time:"18:30",pillar:"verita",
+         title:"Integratori: te ne servono 3, non 30",
+         nota:"Hook e corpo: planner v5 invariati. Nuove: chiusura, finale caption, primo commento.",
+         q:"Quanti barattoli? (numero)",cta:"Commenta GUIDA",
+         copy:[{l:"Chiusura parlata",t:"Prima sistema sonno, proteine e allenamento. Poi, se avanzano soldi,\nla creatina. Non il contrario.\nOra apri il cassetto e contali: quanti barattoli hai?\nScrivi il numero nei commenti — niente vergogna, c'ero anch'io."},
+               {l:"Finale caption",t:"I 5 errori di chi riparte sono nella mia guida gratuita:\ncommenta GUIDA 👇 e te la mando in DM.\n\nQuanti barattoli hai nel cassetto? Scrivi il numero."},
+               {l:"Primo commento (fissalo)",t:"Io al massimo storico: ___ barattoli. Oggi: pochissimi. Tu? Scrivi il numero 👇"}],
+         stories:["Scaffale integratori reale: «Indovina quanti ne servono davvero»","Sondaggio: «Hai mai comprato un bruciagrassi?» → Sì / No","Reshare reel integratori"],
+         tasks:["Girato","Pubblicato in orario","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi vota / commenta"]},
+        {id:"d16",date:"2026-06-16",lab:"MAR 16",type:"REEL",time:"12:30",pillar:"verita",
+         title:"Perché NON ti vendo i «30 giorni per la tartaruga»",
+         nota:"Hook e corpo: planner v5 invariati.",
+         q:"Quante challenge provate? (numero)",cta:"Condividi a un amico",
+         copy:[{l:"Chiusura parlata",t:"Lavoro con chi vuole un cambiamento che dura dieci anni,\nnon una foto che dura dieci giorni.\nDimmi la verità: quante challenge da 30 giorni hai provato?\nScrivi il numero nei commenti."},
+               {l:"Finale caption",t:"Conosci uno che sta per cadere nell'ennesima challenge?\nMandagli questo reel.\n\nQuante challenge da 30 giorni hai provato? Scrivi il numero."},
+               {l:"Primo commento (fissalo)",t:"Le vedo vendere ogni giorno, e so perché funzionano (sul portafoglio). Tu quante ne hai provate? 👇"}],
+         stories:["Clip in palestra: «Niente miracoli, solo lavoro»","Sondaggio: «Ti hanno mai promesso risultati garantiti?» → Sì / No","Reshare reel «30 giorni»"],
+         tasks:["Girato","Pubblicato in orario","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi vota / commenta"]},
+        {id:"d17",date:"2026-06-17",lab:"MER 17",type:"REEL",time:"18:30",pillar:"verita",
+         title:"«Sono troppo vecchio» è la scusa più comoda",
+         nota:"Hook e corpo: planner v5 invariati. Prevedi tempo: hai promesso di rispondere a tutti.",
+         q:"La tua età (numero)",cta:"Commenta GUIDA",
+         copy:[{l:"Chiusura parlata",t:"L'età non è il muro. È la scusa dietro cui ti nascondi per non iniziare.\nToglila di mezzo. E per dimostrartelo: scrivi la tua età nei commenti —\nti rispondo io, uno per uno."},
+               {l:"Finale caption",t:"Vuoi ripartire alla tua età senza farti male?\nCommenta GUIDA 👇 e ti mando «Ritorno in Forma Dopo i 30».\n\nQuanti anni hai? Scrivilo qui sotto. Rispondo a tutti."},
+               {l:"Primo commento (fissalo)",t:"Io sono ripartito da +25 kg. Si riparte, te lo garantisco. La tua età? 👇"}],
+         stories:["Storia a camera: «L'età è una scusa, ve lo dimostro»","Sondaggio: «Pensi di essere troppo vecchio per cambiare?» → Sì / No","Reshare reel età"],
+         tasks:["Girato","Pubblicato in orario","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi vota / commenta"]},
+        {id:"d18",date:"2026-06-18",lab:"GIO 18",type:"REEL",time:"20:00",pillar:"salute",drop:true,
+         title:"Stai seduto 8 ore? La palestra non basta",
+         nota:"Hook e corpo: planner v5 invariati. ➜ Questo è il reel da saltare se la settimana è pesante.",
+         q:"Ore seduto (numero)",cta:"Mandalo a un collega",
+         copy:[{l:"Chiusura parlata",t:"Non devi vivere in palestra. Devi smettere di stare fermo otto ore filate.\nSii onesto: quante ore stai seduto al giorno? Scrivi il numero."},
+               {l:"Finale caption",t:"Mandalo a un collega incollato alla sedia da stamattina.\n\nQuante ore seduto al giorno? Scrivi il numero, sii onesto."},
+               {l:"Primo commento (fissalo)",t:"Le mie, tra due lavori: ___ ore. Per questo le contromisure sopra non sono opzionali. Tu? 👇"}],
+         stories:["Clip: ti alzi / cammini durante una pausa lavoro","Sondaggio: «Mal di schiena negli ultimi 6 mesi?» → Sì / No","Reshare reel postura"],
+         tasks:["Girato","Pubblicato in orario","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi vota / commenta"]},
+        {id:"d19",date:"2026-06-19",lab:"VEN 19",type:"REEL",time:"20:00",pillar:"verita",
+         title:"La genetica è la scusa più comoda di tutte",
+         nota:"Hook e corpo: planner v5 invariati.",
+         q:"SÌ o NO (l'hai usata?)",cta:"Tagga l'amico della «genetica»",
+         copy:[{l:"Chiusura parlata",t:"La genetica conta quando sei avanzato da anni.\nPrima, è solo la scusa più comoda per non impegnarti.\nSii onesto con me: l'hai mai usata anche tu? SÌ o NO nei commenti."},
+               {l:"Finale caption",t:"Taggalo: tutti abbiamo l'amico che dice «eh ma lui ha la genetica».\n\nE tu, l'hai mai usata questa scusa? SÌ o NO 👇"},
+               {l:"Primo commento (fissalo)",t:"Io SÌ, l'ho usata anch'io. Era più comoda che guardare la mia costanza. Tu? 👇"}],
+         stories:["Storia a camera sulla scusa-genetica, tono diretto","Sondaggio: «Conosci uno che dice «lui ha la genetica»?» → Sì / Più di uno","Reshare reel genetica"],
+         tasks:["Girato","Pubblicato in orario","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi vota / commenta"]},
+        {id:"d20",date:"2026-06-20",lab:"SAB 20",type:"CAROSELLO",time:"11:00",pillar:"salute",
+         title:"5 errori che ti distruggono le articolazioni dopo i 35",
+         nota:"Slide 1–7: planner v5 invariate. Slide 8 NUOVA: qui parte LISTA (apertura giovedì 25).",
+         q:"Quale errore fai? (1–5)",cta:"Commenta LISTA",
+         copy:[{l:"Slide 8 — nuovo testo",t:"GIOVEDÌ 25 APRO I PRIMI POSTI DEL MIO COACHING.\nPochi, perché ognuno lo seguo io.\nVuoi saperlo prima degli altri? Commenta LISTA 👇"},
+               {l:"Finale caption",t:"Una cosa, prima che chiudi: giovedì apro i primi posti.\nChi è in lista lo sa prima che lo pubblichi.\nCommenta LISTA 👇 e ti scrivo io.\n\nQuale dei 5 errori fai (o facevi) anche tu? Scrivi il numero 1–5."},
+               {l:"Primo commento (fissalo)",t:"Quello che vedo fare più spesso (e che fa più danni): il n.2, ego lifting. Tu? 1–5 👇"}],
+         stories:["Reshare carosello: «Salvatelo»","Storia a camera: «Giovedì apro i primi posti. Rispondi LISTA a questa storia.»"],
+         tasks:["Creato su Canva (System A)","Pubblicato ore 11:00","Primo commento fissato","Prima ora completata","Stories del giorno","DM di conferma a chi scrive LISTA"]},
+        {id:"d21",date:"2026-06-21",lab:"DOM 21",type:"STORIES",time:"",pillar:"lancio",
+         title:"Riposo + semina LISTA",copy:[],
+         stories:["Storia riposo famiglia","«Questa settimana succede. Rispondi LISTA per l'anteprima.»","Sondaggio: «Giovedì ci sei?» → Ci sono / Vediamo"],
+         tasks:["Stories pubblicate","DM a chi risponde LISTA","DM a chi vota"]}
+      ]},
+    { n:4, title:"Apri le porte",
+      goal:"Convertire la fiducia in conversazioni. LISTA fino a mercoledì · APERTURA giovedì 25 ore 20 · IKIGAI da giovedì.",
+      hash:"#spadanocoaching #naturalbb #metodoikigai #coachingonline #ricomposizionecorporea #over30 #trasformazionenatural",
+      days:[
+        {id:"d22",date:"2026-06-22",lab:"LUN 22",type:"REEL",time:"18:30",pillar:"identita",
+         title:"A tuo figlio non serve un padre stanco. Serve te.",
+         q:"SPECCHIO o QUALCUNO",cta:"Commenta LISTA",
+         copy:[{l:"Script completo (~45s)",t:"Non mi alleno per gli addominali. Mi alleno perché mio figlio\nmerita un padre con energia, non uno spento sul divano.\n\nVi ho raccontato come mi ero perso. La cosa che mi fa più male\ndi quel periodo non è il fisico. È che tornavo a casa svuotato\ne a mio figlio davo gli avanzi.\n\nRimettermi in forma non è stato egoismo. È stato il regalo\npiù grande che potevo fargli: un padre che c'è davvero.\n\nSe ti alleni solo per lo specchio, prima o poi molli.\nSe ti alleni per esserci per chi ami, non molli più.\n\nDimmi la verità: tu per chi ti alleni?\nScrivi SPECCHIO o QUALCUNO nei commenti."},
+               {l:"Caption completa",t:"Non mi alleno per gli addominali.\n\nLa parte che fa ancora male non è l'aspetto: è che a mio figlio\ndavo gli avanzi della giornata. Presente col corpo, assente con l'energia.\n\nUn corpo allenato non è un trofeo da specchio: è il motore\ncon cui reggi il lavoro, le notti, la famiglia.\n\nGiovedì apro i primi posti. Vuoi saperlo prima? Commenta LISTA 👇\n\nE tu per chi ti alleni: SPECCHIO o QUALCUNO?"},
+               {l:"Primo commento (fissalo)",t:"Io: QUALCUNO. Dorme ancora quando esco alle 6 — ed è esattamente il motivo per cui esco. Tu? 👇"}],
+         stories:["Reshare reel padre presente","Sondaggio: «A fine giornata hai energia per i tuoi?» → Sì / Poca","«Giovedì apro. Rispondi LISTA per l'anteprima.»"],
+         tasks:["Girato","Pubblicato in orario","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi vota / commenta"]},
+        {id:"d23",date:"2026-06-23",lab:"MAR 23",type:"REEL",time:"12:30",pillar:"storia",
+         title:"Non sono il coach con 50k follower. E va bene così.",
+         q:"FAMOSO o PRESENTE",cta:"Commenta LISTA",
+         copy:[{l:"Script completo (~45s)",t:"Non ho cinquantamila follower. Non ho testimonial ovunque.\nNon ho il fisico da copertina. E ti spiego perché per te\npuò essere un vantaggio.\n\nQuei coach hanno duecento clienti, e ti rispondono —\nquando rispondono — con un messaggio copia-incolla.\nIo ne seguo pochi, di proposito. E li seguo davvero.\n\nE c'è una cosa che il coach famoso spesso non ha più:\nio ci sono passato da poco. Mi ricordo com'è\nguardarsi allo specchio e non riconoscersi.\n\nTu cosa sceglieresti: il coach FAMOSO o quello PRESENTE?"},
+               {l:"Caption completa",t:"«Ci sono coach più grossi di te.» Vero. Te lo dico io per primo.\n\nMa centinaia di clienti = risposte copia-incolla, e una distanza\nenorme da com'è davvero essere fuori forma a 35 anni.\n\nIo seguo poche persone, di proposito. E ci sono passato da poco.\n\nGiovedì apro i primi posti. Chi è in lista lo sa prima: commenta LISTA 👇\n\nTu cosa cerchi: FAMOSO o PRESENTE?"},
+               {l:"Primo commento (fissalo)",t:"Quando ero perso mi sarebbe servito quello PRESENTE. Per questo seguo pochi. Tu? 👇"}],
+         stories:["Clip in palestra, energia alta","Sondaggio: «Un coach con 200 clienti può seguirti davvero?» → Sì / No","Reshare reel 50k + «Rispondi LISTA»"],
+         tasks:["Girato","Pubblicato in orario","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi vota / commenta"]},
+        {id:"d24",date:"2026-06-24",lab:"MER 24",type:"REEL",time:"18:30",pillar:"verita",
+         title:"«No pain no gain» è la bugia che ti fa infortunare",
+         q:"SÌ o NO (infortunio evitabile)",cta:"Commenta LISTA — ultima chiamata",
+         copy:[{l:"Script completo (~45s)",t:"«Se non fa male non funziona.» Questa frase ha rovinato\npiù schiene e spalle di qualsiasi scheda sbagliata.\n\nIl bruciore muscolare della fatica è una cosa: fa parte del gioco.\nIl dolore articolare — acuto, localizzato, sbagliato —\nè un segnale di stop. Non una medaglia.\n\nAllenarsi duro: sì, sempre. Allenarsi nel dolore sbagliato: mai.\nImparare la differenza è ciò che ti fa durare.\n\nTi sei mai fermato per un infortunio che potevi evitare?\nSÌ o NO nei commenti."},
+               {l:"Caption completa",t:"«Se non fa male non funziona» ha rovinato più spalle\ndi qualsiasi programma sbagliato.\n\nBruciore muscolare: normale. Dolore articolare acuto: stop.\nConfonderli costa sei settimane di fermo. Distinguerli ti fa durare anni.\n\nDomani apro i primi posti. Ultima chiamata per l'anteprima: commenta LISTA 👇\n\nTi sei mai fermato per un infortunio evitabile? SÌ o NO."},
+               {l:"Primo commento (fissalo)",t:"Quasi tutti quelli che ripartono ne hanno almeno uno alle spalle. Tu? SÌ o NO 👇"}],
+         stories:["COUNTDOWN sticker → giovedì ore 20:00","«Domani apro 5 posti. Lista chiusa stanotte: rispondi LISTA.»","Reshare reel no pain"],
+         tasks:["Girato","Pubblicato in orario","Primo commento fissato","Countdown sticker attivo","Prima ora completata","Stories del giorno","DM a chi vota / commenta"]},
+        {id:"d25",date:"2026-06-25",lab:"GIO 25",type:"REEL",time:"20:00",pillar:"lancio",
+         title:"APERTURA · Apro 5 posti. Te lo dico in modo onesto.",
+         nota:"Il giorno più importante del mese. Mattina: DM a tutta la LISTA. Sera ore 20: reel. Da oggi il trigger è IKIGAI.",
+         q:"Da quanti anni rimandi? (numero)",cta:"IKIGAI in DM (o nei commenti)",
+         copy:[{l:"DM alla LISTA (mattina)",t:"Buongiorno [nome] 👊 Come promesso, lo sai prima degli altri:\noggi apro i 5 posti del percorso, prezzo di lancio.\nStasera lo pubblico — ma tu puoi partire adesso.\nSe vuoi il tuo: rispondimi IKIGAI e ti faccio 3 domande veloci."},
+               {l:"Script completo (~50s)",t:"Sono trasparente con te: sto costruendo questo\nper farlo diventare il mio unico lavoro. E mi servono\npoche persone serie che ci credano adesso.\n\nPer quasi un mese vi ho dato tutto senza chiedere niente.\n\nOggi apro 5 posti, a un prezzo di lancio che non riproporrò più.\nFaccio due lavori e ho un figlio piccolo: posso seguire bene\nsolo poche persone. Per questo sono pochi.\n\nChi entra ora scommette su di me prima dei numeri grossi.\n\nSe sei l'uomo che si è perso ed è pronto a tornare:\nscrivimi IKIGAI in DM, o commentalo qui e ti scrivo io.\n\nE dimmi: da quanti anni rimandi? Scrivi il numero."},
+               {l:"Caption completa",t:"Oggi apro. E ve lo dico come l'ho sempre detto: chiaro.\n\nSto costruendo Spadano Coaching per farlo diventare il mio\nunico lavoro. Due lavori, un figlio piccolo, un sogno.\n\nApro 5 posti al prezzo di Lancio: il più basso che farò mai.\nPosso seguire davvero bene solo poche persone.\n\nScrivimi IKIGAI in DM (o commentalo: ti scrivo io).\nNe parliamo, senza impegno.\n\nDa quanti anni rimandi? Scrivi il numero 👇"},
+               {l:"Primo commento (fissalo)",t:"Io ho rimandato ___ anni prima di decidere. So com'è. Tu? Scrivi il numero 👇"}],
+         stories:["Mattina: «La lista ha già ricevuto il mio DM»","Sera: reshare reel apertura + «Scrivimi IKIGAI»","Sondaggio: «Il posto: lo prendi o ci pensi?» → Lo prendo / Ci penso"],
+         tasks:["Mattina: DM a tutta la LISTA","Girato","Pubblicato ore 20:00","Primo commento fissato","Prima ora completata","Stories del giorno","DM IKIGAI: 3 domande → call"]},
+        {id:"d26",date:"2026-06-26",lab:"VEN 26",type:"REEL",time:"20:00",pillar:"salute",
+         title:"Non voglio farti tornare come a 20 anni. Voglio di meglio.",
+         q:"MERITO o CASO",cta:"IKIGAI in DM",
+         copy:[{l:"Script completo (~45s)",t:"La gente vuole «tornare come a vent'anni». Io non te lo prometto.\nTi prometto qualcosa di più serio.\n\nA vent'anni eri in forma per caso: metabolismo veloce,\nzero responsabilità. Era un regalo dell'età, non un merito.\n\nQuello che puoi costruire adesso vale di più:\nun fisico fatto con consapevolezza, una forza che non ti rompe,\nl'energia per reggere lavoro e famiglia.\n\nNon la versione nostalgica di te. La versione migliore di te.\n\nA vent'anni eri in forma per MERITO o per CASO?"},
+               {l:"Caption completa",t:"«Voglio tornare come a 20 anni.» Non te lo prometto. Posso di meglio.\n\nA 20 anni eri in forma per caso. Adesso puoi esserlo per scelta:\nforza che non ti rompe, salute che ti porti integro per decenni.\n\nRestano pochi posti del prezzo di Lancio.\nScrivimi IKIGAI in DM e ne parliamo senza impegno.\n\nA 20 anni: MERITO o CASO? Sii onesto 👇"},
+               {l:"Primo commento (fissalo)",t:"Io facevo arti marziali: il fisico c'era, eppure l'ho perso lo stesso. Quello di adesso me lo sono scelto. Tu? 👇"}],
+         stories:["2–3 screenshot DM ricevuti (nomi oscurati)","«Restano X posti» — sempre il numero VERO","Reshare reel versione migliore"],
+         tasks:["Girato","Pubblicato in orario","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi vota / commenta"]},
+        {id:"d27",date:"2026-06-27",lab:"SAB 27",type:"CAROSELLO",time:"11:00",pillar:"lancio",
+         title:"Posti aperti: prezzi, regole, per chi è",
+         nota:"Slide 1–8: planner v5 invariate (prezzi: 3 mesi 240€ · 6 mesi 420€ · 12 mesi 720€). Slide 9 NUOVA.",
+         q:"3, 6 o 12 mesi? (numero)",cta:"IKIGAI in DM",
+         copy:[{l:"Slide 9 — nuovo testo",t:"RESTANO POCHI POSTI. A FINE MESE CHIUDO.\nScrivimi IKIGAI in DM — 3 domande, una call gratuita\ndi 15 minuti, e decidiamo insieme. Senza impegno."},
+               {l:"Coda caption",t:"Domanda secca, anche solo per curiosità:\n3, 6 o 12 mesi — quale sceglieresti? Scrivi il numero 👇"},
+               {l:"Primo commento (fissalo)",t:"Consiglio onesto: il 6 mesi è dove i corpi cambiano davvero. Ma si parte anche da 3. Tu? 👇"}],
+         stories:["Reshare carosello: «Tutto chiaro qui: prezzi e regole, swipe»","Countdown fine mese"],
+         tasks:["Creato su Canva (System A)","Pubblicato ore 11:00","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi commenta"]},
+        {id:"d28",date:"2026-06-28",lab:"DOM 28",type:"STORIES",time:"",pillar:"lancio",
+         title:"Ultima chiamata",copy:[],
+         stories:["«Domani chiudo. Se ci stavi pensando, scrivimi ora: IKIGAI.»","Storia di chiusura mese: «Grazie. È solo l'inizio.»"],
+         tasks:["Stories pubblicate","DM finali gestiti"]}
+      ]}
+,
+
+  { n:5, title:"Il metodo in azione",
+    goal:"Hai aperto. Ora mostri come lavori davvero: backstage onesto dei primi giorni coi nuovi clienti. Chi non è entrato vede la macchina girare.",
+    hash:"#spadanocoaching #naturalbb #ricomposizionecorporea #coachingonline #metodoikigai #over35 #naturalbodybuilding",
+    days:[
+      {id:"d29",date:"2026-06-29",lab:"LUN 29",type:"REEL",time:"18:30",pillar:"identita",
+       title:"Il primo giorno con un cliente nuovo non si allena",
+       q:"SÌ o NO (programma senza domande)",cta:"Commenta GUIDA",
+       copy:[
+        {l:"Script (~45s)",t:"Il primo giorno con un cliente nuovo non lo faccio allenare. E ti spiego perché.\n\nLa maggior parte dei coach ti manda una scheda il primo giorno.\nBella, piena di esercizi. Senza sapere niente di te.\n\nIo il primo giorno faccio domande. Quante ore dormi davvero.\nChe lavoro fai, quante ore stai seduto. Quali acciacchi ti porti dietro.\nA che ora riesci ad allenarti senza rubare tempo a nessuno.\n\nPerché un programma che non entra nella tua vita è un PDF, non un percorso.\nE i PDF si abbandonano al terzo mese — l'ho fatto anch'io, per anni.\n\nDa bodybuilder ti dico: la scheda perfetta non esiste.\nEsiste quella che riesci a seguire per sei mesi.\n\nTi hanno mai dato un programma senza chiederti niente? SÌ o NO nei commenti."},
+        {l:"Caption",t:"Il primo giorno non ti faccio allenare. Faccio domande.\n\nSonno, lavoro, ore da seduto, acciacchi, l'orario che non ruba tempo\na nessuno. Perché un programma che non entra nella tua vita\nè un PDF — e i PDF si mollano al terzo mese.\n\nLa scheda perfetta non esiste. Esiste quella che reggi per sei mesi.\n\nVuoi capire come si riparte senza farsi male?\nCommenta GUIDA 👇 e ti mando «Ritorno in Forma Dopo i 30».\n\nTi hanno mai dato un programma senza chiederti niente? SÌ o NO."},
+        {l:"Primo commento (fissalo)",t:"Io per anni ho seguito schede copiate, senza che nessuno mi chiedesse\ncome vivevo. Le ho mollate tutte. Tu? SÌ o NO 👇"}],
+       stories:["Foto del blocco note/app con le domande iniziali → «Il vero primo giorno è questo»","«La domanda che faccio per prima: a che ora ti alleni senza togliere tempo a chi ami?»","Sondaggio: «Un coach ti ha mai chiesto come dormi?» → Sì / Mai"],
+       tasks:["Girato","Pubblicato ore 18:30","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi commenta GUIDA"]},
+      {id:"d30",date:"2026-07-01",lab:"MER 1/7",type:"REEL",time:"18:30",pillar:"ferro",
+       title:"Perché non do la stessa scheda a due persone",
+       q:"SÌ o NO (hai copiato una scheda?)",cta:"Commenta GUIDA",
+       copy:[
+        {l:"Script (~45s)",t:"Due persone, stessa età, stesso obiettivo. E gli do due schede diverse.\nNon per complicare. Perché è l'unico modo che funziona.\n\nUno ha la spalla che scricchiola da un vecchio infortunio:\nniente military press pesante, lavoriamo su angoli che non gli fanno male.\nL'altro sta seduto nove ore al giorno: prima sistemiamo le anche\ne la schiena, o lo squat diventa un problema.\n\nDa bodybuilder lo so bene: i princìpi sono universali —\nrange completo, eccentrica controllata, sovraccarico progressivo.\nMa gli esercizi si scelgono sulla persona, non sul manuale.\n\nChi ti vende la stessa scheda per tutti non sta allenando te.\nSta fotocopiando.\n\nHai mai copiato la scheda di un altro? SÌ o NO."},
+        {l:"Caption",t:"Due persone uguali sulla carta. Due schede diverse.\n\nUno ha una spalla fragile: scegliamo angoli che non la infiammano.\nL'altro sta seduto nove ore: prima le anche, poi lo squat.\n\nI princìpi non cambiano mai — range completo, eccentrica controllata,\nprogressione. Gli esercizi sì: si scelgono su di te, non sul manuale.\n\nChi ti dà la stessa scheda di tutti non ti allena. Fotocopia.\n\nVuoi i princìpi giusti per ripartire? Commenta GUIDA 👇\n\nHai mai copiato la scheda di un altro? SÌ o NO."},
+        {l:"Primo commento (fissalo)",t:"Io sì, copiavo le schede dei più grossi in palestra. Risultato: zero,\ne una contrattura. Tu? SÌ o NO 👇"}],
+       stories:["Clip: due varianti dello stesso esercizio → «Stesso muscolo, due strade»","«La spalla fragile non si evita: si lavora intorno. Te lo mostro.»","Quiz: «Cosa conta di più per crescere?» → A) Il peso · B) Come fai il movimento ✓ · C) Quante volte vai"],
+       tasks:["Girato","Pubblicato ore 18:30","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi commenta GUIDA"]},
+      {id:"d31",date:"2026-07-03",lab:"VEN 3/7",type:"REEL",time:"20:00",pillar:"verita",
+       title:"La cosa più difficile dei primi 10 giorni",
+       q:"TEMPO o TESTA",cta:"Commenta GUIDA",
+       copy:[
+        {l:"Script (~50s)",t:"La cosa più difficile dei primi dieci giorni non è l'allenamento.\nÈ un'altra, e quasi nessuno la dice.\n\nI primi giorni il fisico non cambia. È normale, è fisiologia.\nMa la testa vuole la prova subito, vuole vedere lo specchio diverso domani.\n\nE lì si gioca tutto. Perché chi molla, molla adesso —\nnon perché l'allenamento sia troppo duro, ma perché non vede ancora niente.\n\nIl mio lavoro nei primi dieci giorni è quasi più di testa che di ferro:\nti tolgo l'aspettativa sbagliata e ti do quella giusta.\nLa prima vittoria non è lo specchio. È esserci stato tre volte questa settimana.\nPoi il corpo arriva. Arriva sempre, se non molli prima.\n\nCosa ti ferma di più — il tempo o la testa? Scrivilo nei commenti."},
+        {l:"Caption",t:"La parte più difficile dei primi 10 giorni non è allenarsi.\n\nÈ che il fisico ancora non cambia, ma la testa vuole la prova subito.\nChi molla, molla qui — non per fatica, ma perché non vede niente.\n\nIl mio lavoro all'inizio è togliere l'aspettativa sbagliata:\nla prima vittoria non è lo specchio, è esserci stato tre volte.\nPoi il corpo arriva. Sempre, se non molli prima.\n\nVuoi ripartire con la testa giusta? Commenta GUIDA 👇\n\nCosa ti ferma di più: il TEMPO o la TESTA?"},
+        {l:"Primo commento (fissalo)",t:"Per me, quando sono ripartito da +25 kg, era la testa.\nIl tempo era una scusa che mi raccontavo. Tu? TEMPO o TESTA 👇"}],
+       stories:["Foto sveglia 6:00/palestra vuota → «Giorno 8. Lo specchio non è cambiato. Io ci sono.»","«Ai miei clienti il giorno 3 dico: non guardare la bilancia. Guarda il calendario.»","Slider 💪: «Quanto è dura la testa nei primi giorni, da 1 a 100?»"],
+       tasks:["Girato","Pubblicato ore 20:00","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi commenta GUIDA"]},
+      {id:"d32",date:"2026-07-04",lab:"SAB 4/7",type:"CAROSELLO",time:"11:00",pillar:"lancio",
+       title:"Come è andata la prima settimana coi nuovi clienti",
+       nota:"Backstage onesto: racconti il PROCESSO, non risultati che dopo una settimana non esistono.",
+       q:"Da quanto sei fermo? (num.)",cta:"Commenta GUIDA",
+       copy:[
+        {l:"Slide 1 (cover)",t:"LA PRIMA SETTIMANA COI NUOVI CLIENTI (arancio: PRIMA SETTIMANA) — SCORRI →"},
+        {l:"Slide 2",t:"Nessuno ha toccato un bilanciere il primo giorno. Prima le domande: vita, sonno, lavoro, acciacchi."},
+        {l:"Slide 3",t:"Ho riscritto ogni programma sulla persona. Stessi princìpi, esercizi diversi. Zero copia-incolla."},
+        {l:"Slide 4",t:"La regola data a tutti: nei primi 10 giorni si lascia margine. Mai a cedimento. Tecnica prima del peso."},
+        {l:"Slide 5",t:"Il messaggio più ripetuto: «non guardare lo specchio, guarda se ci sei stato»."},
+        {l:"Slide 6",t:"Cosa NON ho promesso a nessuno: risultati in 30 giorni. Perché non funziona così, e lo sai anche tu."},
+        {l:"Slide 7",t:"La verità: la prima settimana non trasforma. Costruisce le fondamenta. Chi salta questa parte, molla alla terza."},
+        {l:"Slide 8 (CTA)",t:"Vuoi ripartire con questo metodo? Tutto parte dalla guida. Commenta GUIDA 👇"},
+        {l:"Caption",t:"Una settimana coi primi clienti del percorso. Ve la racconto onesta.\n\nNessuno si è allenato il primo giorno: prima le domande.\nOgni programma riscritto sulla persona — stessi princìpi, esercizi diversi.\nA tutti la stessa regola: primi 10 giorni con margine, tecnica prima del peso.\n\nCosa non ho promesso a nessuno: risultati in 30 giorni.\nPerché la prima settimana non trasforma. Costruisce le fondamenta.\n\nVuoi ripartire così? Commenta GUIDA 👇 e ti mando la guida gratuita.\n\nTu da quanto sei fermo? Scrivi il numero (mesi o anni)."},
+        {l:"Primo commento (fissalo)",t:"La domanda che ho fatto per prima a tutti: a che ora ti alleni\nsenza togliere tempo a chi ami? Tu come rispondi? 👇"}],
+       stories:["Reshare carosello → «Come ho passato la prima settimana coi nuovi. Nel feed.»","«Mandalo a chi sta per comprare l'ennesima scheda copiata.»","Sondaggio: «Ti è mai stato chiesto come vivi, prima di darti un piano?» → Sì / Mai"],
+       tasks:["Creato su Canva (System A)","Pubblicato ore 11:00","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi commenta GUIDA"]},
+      {id:"d33",date:"2026-07-05",lab:"DOM 5/7",type:"STORIES",time:"",pillar:"riposo",
+       title:"Riposo + anteprima Settimana 6",copy:[],
+       stories:["Famiglia/riposo → «Domenica. Anche il recupero è allenamento. I miei clienti oggi staccano.»","«Settimana prossima vi mostro la parte che nessuno fa vedere: cosa cambio dopo i primi feedback.»","Sondaggio: «Curioso di vedere come aggiusto i programmi?» → Sì / Molto"],
+       tasks:["Stories pubblicate","DM a chi vota / risponde"]}
+    ]},
+  { n:6, title:"La prova",
+    goal:"Seconda settimana di metodo al lavoro: mostri l'aggiustamento (ciò che un PDF non fa). Apri il trigger PERCORSO per chi, vedendo, vuole entrare. Porta socchiusa, non apertura urlata.",
+    hash:"#spadanocoaching #naturalbb #ricomposizionecorporea #coachingonline #metodoikigai #naturalbodybuilding #over30 #costanza",
+    days:[
+      {id:"d34",date:"2026-07-06",lab:"LUN 6/7",type:"REEL",time:"18:30",pillar:"ferro",
+       title:"Cosa cambio dopo i primi feedback (il PDF non lo fa)",
+       q:"NESSUNO o COACH",cta:"Commenta PERCORSO",
+       copy:[
+        {l:"Script (~50s)",t:"Dopo dieci giorni, ai miei clienti il programma cambia. E questo\nè esattamente ciò che un PDF non potrà mai fare per te.\n\nUno mi scrive che la sera è troppo cotto per allenarsi bene:\nspostiamo le sedute al mattino, e il problema sparisce.\nUn altro sente lo squat sulla schiena e non sulle gambe:\ncambiamo l'esecuzione, gli sistemo l'assetto, e finalmente lavora dove deve.\n\nQuesto è il punto di avere un coach invece di un foglio:\nil foglio resta uguale mentre la tua vita cambia.\nIo aggiusto in corsa, perché ti vedo, ti sento, ti rispondo.\n\nDa bodybuilder è la cosa che ho imparato in cinque anni sotto un coach:\nil programma è vivo, non è scolpito nella pietra.\n\nIl tuo ultimo programma, chi te l'ha aggiustato? Scrivi NESSUNO o COACH."},
+        {l:"Caption",t:"Dopo 10 giorni, i programmi cambiano. Il PDF non lo fa.\n\nUno la sera è troppo cotto: sposto al mattino. Un altro sente\nlo squat sulla schiena: gli sistemo l'assetto.\n\nIl foglio resta uguale mentre la tua vita cambia.\nUn coach aggiusta in corsa, perché ti vede e ti risponde.\n\nHo deciso di aprire qualche spazio in più nel percorso.\nVuoi sapere come funziona? Commenta PERCORSO 👇\n\nIl tuo ultimo programma, chi te l'ha aggiustato? NESSUNO o COACH."},
+        {l:"Primo commento (fissalo)",t:"I miei per anni: NESSUNO. Seguivo fogli morti finché non mi sono rotto.\nTu? NESSUNO o COACH 👇"}],
+       stories:["Screenshot (oscurato) «ho spostato l'allenamento al mattino, va molto meglio» → «Questo è aggiustare in corsa»","«PERCORSO è la parola: scrivila e ti spiego come si entra.»","Sondaggio: «Programma fisso o uno che si aggiusta su di te?» → Fisso / Che si aggiusta"],
+       tasks:["Girato","Pubblicato ore 18:30","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi commenta PERCORSO"]},
+      {id:"d35",date:"2026-07-08",lab:"MER 8/7",type:"REEL",time:"18:30",pillar:"ferro",
+       title:"L'errore di assetto sullo squat che vedo in tutti",
+       q:"GAMBE o SCHIENA",cta:"Commenta GUIDA",
+       copy:[
+        {l:"Script (~45s)",t:"C'è un errore sullo squat che vedo praticamente in tutti quelli\nche ripartono. E quando lo correggo, cambia tutto in una seduta.\n\nScendi e il ginocchio va avanti, il busto crolla in avanti,\ne la mattina dopo ti fa male la schiena, non le gambe.\nIl problema non è lo squat: è l'assetto.\n\nTieni il petto alto, spingi il bacino indietro come per sederti,\npeso sul mezzo piede, e scendi controllando — eccentrica lenta,\nnon ti lasci cadere. Il muscolo lavora dove deve, la schiena ringrazia.\n\nDa bodybuilder: lo squat è un esercizio fantastico, ma fatto male\nè il primo modo per fermarti. Si spinge forte, ma con l'assetto giusto.\n\nLo squat lo senti sulle gambe o sulla schiena? Scrivi GAMBE o SCHIENA."},
+        {l:"Caption",t:"L'errore sullo squat che vedo in tutti quelli che ripartono.\n\nIl busto crolla in avanti e la mattina dopo fa male la schiena,\nnon le gambe. Non è lo squat: è l'assetto.\n\nPetto alto, bacino indietro, peso sul mezzo piede, eccentrica\ncontrollata. Il muscolo lavora dove deve, la schiena ringrazia.\n\nSi spinge forte — ma con l'assetto giusto. Sempre le due cose.\n\nVuoi ripartire senza farti male? Commenta GUIDA 👇\n\nLo squat lo senti sulle GAMBE o sulla SCHIENA?"},
+        {l:"Primo commento (fissalo)",t:"Quando sono ripartito lo sentivo tutto sulla schiena: assetto sbagliato.\nSistemato quello, è cambiato tutto. Tu? GAMBE o SCHIENA 👇"}],
+       stories:["Clip: squat assetto sbagliato vs corretto → «Trova la differenza»","«Petto alto + bacino indietro. Provalo a corpo libero adesso.»","Quiz: «Dove deve stare il peso nello squat?» → Punte · Mezzo piede ✓ · Talloni"],
+       tasks:["Girato","Pubblicato ore 18:30","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi commenta GUIDA"]},
+      {id:"d36",date:"2026-07-10",lab:"VEN 10/7",type:"REEL",time:"20:00",pillar:"identita",
+       title:"Cosa è cambiato in me in due settimane (non quello che pensi)",
+       q:"CORPO o ENERGIA",cta:"Commenta PERCORSO",
+       copy:[
+        {l:"Script (~50s)",t:"Quando sono ripartito da +25 kg, la prima cosa che è cambiata\nin due settimane non è stata il fisico. Te lo dico perché conta.\n\nIl corpo dopo due settimane era praticamente uguale.\nMa mi svegliavo diverso. Avevo energia per mio figlio la sera,\nnon gli davo più gli avanzi della giornata. Dormivo meglio.\nSalivo le scale senza pensarci.\n\nQuesta è la cosa che dico sempre a chi inizia: i primi risultati\nnon li vedi allo specchio. Li senti nella giornata.\nE sono quelli che ti fanno restare, finché lo specchio arriva.\n\nDa bodybuilder duro come sono, è la lezione più importante:\nil fisico è la conseguenza, l'energia è il primo regalo.\n\nLa prima cosa che vorresti cambiare — il CORPO o l'ENERGIA?"},
+        {l:"Caption",t:"Cosa è cambiato in me in due settimane? Non il fisico.\n\nDopo +25 kg, le prime due settimane il corpo era uguale.\nMa avevo energia per mio figlio la sera, dormivo meglio,\nsalivo le scale senza pensarci.\n\nI primi risultati non li vedi allo specchio. Li senti nella giornata.\nE sono quelli che ti fanno restare finché lo specchio arriva.\n\nSto seguendo nuove persone nel percorso. Vuoi entrare?\nCommenta PERCORSO 👇\n\nLa prima cosa che vorresti cambiare: CORPO o ENERGIA?"},
+        {l:"Primo commento (fissalo)",t:"Per me la prima cosa tornata è stata l'energia per mio figlio.\nIl fisico è venuto dopo. Tu? CORPO o ENERGIA 👇"}],
+       stories:["Foto vita reale (caffè 6:00, o famiglia) → «Il primo risultato non è lo specchio. È questo.»","«I miei clienti a due settimane mi scrivono la stessa cosa: 'ho più energia'.»","Sondaggio: «Cosa ti manca di più adesso?» → Energia / Forma fisica"],
+       tasks:["Girato","Pubblicato ore 20:00","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi commenta PERCORSO"]},
+      {id:"d37",date:"2026-07-11",lab:"SAB 11/7",type:"CAROSELLO",time:"11:00",pillar:"lancio",
+       title:"2 settimane di metodo: cosa è successo davvero",
+       q:"Cosa ti convince? 1–6",cta:"Commenta PERCORSO",
+       copy:[
+        {l:"Slide 1 (cover)",t:"DUE SETTIMANE DI METODO: COSA È SUCCESSO (arancio: COSA È SUCCESSO) — SCORRI →"},
+        {l:"Slide 2",t:"Settimana 1 → domande, non bilanciere. Ogni programma cucito sulla persona."},
+        {l:"Slide 3",t:"Settimana 2 → primi aggiustamenti. Orari spostati, assetti corretti, esercizi cambiati sui feedback."},
+        {l:"Slide 4",t:"Il dato onesto: nessuna trasformazione fisica in 14 giorni. Chi te la promette mente."},
+        {l:"Slide 5",t:"Quello che è cambiato davvero: energia, sonno, costanza. Tre presenze a settimana, mantenute."},
+        {l:"Slide 6",t:"La differenza dal PDF: il programma è cambiato due volte in due settimane. Un foglio non lo fa."},
+        {l:"Slide 7 (CTA)",t:"Hai visto come lavoro. Se vuoi entrare: commenta PERCORSO 👇 e ti spiego come."},
+        {l:"Caption",t:"Due settimane di metodo al lavoro. Niente foto patinate: i fatti.\n\nSettimana 1: domande, non bilanciere. Settimana 2: aggiustamenti veri —\norari, assetti, esercizi cambiati sui feedback.\n\nIl dato onesto: zero trasformazioni fisiche in 14 giorni.\nQuello che è cambiato: energia, sonno, costanza. Tre presenze, mantenute.\n\nLa differenza dal PDF? Il programma è cambiato due volte. Un foglio no.\n\nHai visto come lavoro. Vuoi entrare? Commenta PERCORSO 👇\n\nCosa ti convince di più? Scrivi il numero (1–6)."},
+        {l:"Primo commento (fissalo)",t:"La cosa di cui vado più fiero: nessuno ha mollato in due settimane.\nPerché nessuno si aspettava il miracolo. Tu cosa cerchi? 1–6 👇"}],
+       stories:["Reshare carosello → «Due settimane di metodo, nel feed. Onesto.»","«PERCORSO: la parola per entrare. Te lo spiego in DM, senza pressione.»","Sondaggio: «Ti fidi più di un prima/dopo o di un metodo spiegato?» → Prima/dopo / Metodo"],
+       tasks:["Creato su Canva (System A)","Pubblicato ore 11:00","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi commenta PERCORSO"]},
+      {id:"d38",date:"2026-07-12",lab:"DOM 12/7",type:"STORIES",time:"",pillar:"riposo",
+       title:"Riposo + ponte",copy:[],
+       stories:["Famiglia/riposo → «Domenica. Un mese fa aprivo i posti. Oggi il metodo è al lavoro.»","«Domani ricomincia tutto. Stessa direzione, contenuti nuovi.»","Sondaggio: «Questo mese ti è stato utile?» → Sì / Molto"],
+       tasks:["Stories pubblicate","DM a chi vota / risponde"]},
+      {id:"d39",date:"2026-07-13",lab:"LUN 13/7",type:"REEL",time:"18:30",pillar:"identita",
+       title:"PONTE · Un mese fa ti ho promesso una cosa. Ecco cosa è successo.",
+       nota:"Chiude l'arco del mese e riapre il ciclo. Per chi arriva ora: la guida è il punto di partenza.",
+       q:"Da quanti giorni rimandi? (num.)",cta:"Commenta GUIDA",
+       copy:[
+        {l:"Script (~50s)",t:"Un mese fa ho iniziato a raccontarvi la mia storia vera.\nOggi vi dico onestamente dove siamo arrivati.\n\nVi ho parlato della caduta: +25 kg, fermo un anno e mezzo,\nle sei del mattino per ripartire senza togliere tempo alla famiglia.\nPoi vi ho detto le verità scomode che nessun coach dice.\nPoi ho aperto i posti. E ho preso in carico le prime persone.\n\nIn queste due settimane vi ho mostrato come lavoro davvero:\ndomande prima del bilanciere, programmi cuciti addosso,\naggiustamenti in corsa. Niente miracoli promessi, perché non esistono.\n\nAdesso ricominciamo. Stessa direzione, contenuti nuovi.\nPer chi è arrivato solo ora: tutto parte dalla guida gratuita.\n\nDa quanti giorni stai rimandando il momento di ripartire?\nScrivi il numero. Senza giudizio — c'ero anch'io."},
+        {l:"Caption",t:"Un mese fa vi ho promesso la verità. Ecco cosa è successo.\n\nLa mia storia (+25 kg, le 6:00). Le verità scomode.\nL'apertura dei posti. Le prime persone prese in carico.\nE due settimane a mostrarvi come lavoro: domande, programmi cuciti,\naggiustamenti veri. Zero miracoli, perché non esistono.\n\nAdesso si ricomincia. Per chi arriva ora: parti dalla guida.\nCommenta GUIDA 👇 e te la mando.\n\nDa quanti giorni stai rimandando? Scrivi il numero. C'ero anch'io."},
+        {l:"Primo commento (fissalo)",t:"Io ho rimandato più di un anno prima di decidere. Un giorno ho smesso\ndi raccontarmela. Tu da quanti giorni? 👇"}],
+       stories:["Carrellata: 3-4 cover dei reel del mese → «Un mese in una storia»","«Chi è arrivato ora: la guida è il punto di partenza. GUIDA in commento o DM.»","Sondaggio: «Pronto a smettere di rimandare?» → Sì / Quasi"],
+       tasks:["Girato","Pubblicato ore 18:30","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi commenta GUIDA"]}
+    ]}
+  ],
+  dm:[
+    {g:"LEAD (sempre attivi)",items:[
+      {l:"Chi commenta GUIDA — risposta pubblica",t:"Inviata 👊 controlla le richieste in DM."},
+      {l:"Chi commenta GUIDA — DM",t:"Ciao [nome], come promesso: «Ritorno in Forma Dopo i 30» 👉 [guida]\nLeggi prima l'errore n.1: è quello che frega quasi tutti.\nCuriosità: da quanto sei fermo?"},
+      {l:"Chi vota gli sticker (stesso giorno)",t:"Ho visto il tuo voto sulla storia 👊 Ci sono passato anch'io.\nPosso chiederti cosa ti ha fermato finora: il tempo o la testa?"},
+      {l:"Chi lascia un numero — risposta pubblica",t:"💪 Grazie della fiducia. Ti scrivo una cosa onesta in DM, va bene?"}
+    ]},
+    {g:"LANCIO (20–24/6: LISTA)",items:[
+      {l:"Chi scrive LISTA — DM conferma",t:"Sei dentro 👊 Giovedì 25 apro 5 posti e tu lo saprai prima.\nUna domanda: obiettivo principale — perdere grasso, mettere muscolo, o tutti e due?"}
+    ]},
+    {g:"VENDITA (dal 25/6: IKIGAI)",items:[
+      {l:"IKIGAI — Domanda 1",t:"Grande [nome] 👊 Grazie della fiducia.\nTre domande veloci per capire se posso aiutarti.\nLa prima: da quanto tempo sei fermo, o ti alleni senza risultati?"},
+      {l:"IKIGAI — Domanda 2",t:"Seconda: obiettivo principale — perdere grasso, mettere muscolo, o tutti e due?"},
+      {l:"IKIGAI — Domanda 3",t:"Ultima: quante sedute a settimana reggi DAVVERO, tra lavoro e famiglia? Sii realista."},
+      {l:"Invito alla call",t:"Ok [nome], ci sta — e il tuo caso è il tipo con cui lavoro meglio.\n15 minuti al telefono, gratis: ti dico cosa farei con te, e poi decidi.\nDomani alle [ora] o alle [ora]?"},
+      {l:"Se chiede il prezzo",t:"Te lo dico subito: prezzo di lancio 240€ (3 mesi), 420€ (6), 720€ (12).\nPagamento anticipato. È il più basso che farò mai.\nLa call serve a capire se siamo la combinazione giusta, non a convincerti."},
+      {l:"Se dice «ci penso»",t:"Giusto pensarci. Ti dico solo due cose oneste: i posti sono 5\ne il prezzo di lancio non torna. Se hai UNA domanda che ti blocca, falla adesso."}
+    ]}
+  ],
+  call:[
+    "0–5 min · La sua storia: «Raccontami: quando ti sei perso di vista?» Ascolta. Segna UNA sua frase testuale.",
+    "5–10 min · Diagnosi onesta: cosa faresti nei primi 30 giorni. Usa la SUA frase. Di' anche cosa NON prometti.",
+    "10–13 min · Il percorso: cosa include + prezzi, chiari.",
+    "13–15 min · Decisione: «Da parte mia c'è il posto. Vuoi partire?» Se ni: «Te lo tengo fino a [data], poi passa al prossimo.»"
+  ],
+  hash:[
+    {l:"Hashtag Settimana 3 (verità)",t:"#spadanocoaching #naturalbb #ricomposizionecorporea #verità #trasformazionefisica #over40"},
+    {l:"Hashtag Settimana 4 (apertura)",t:"#spadanocoaching #naturalbb #metodoikigai #coachingonline #ricomposizionecorporea #over30"}
+  ]
+};
+
+var FIRST_HOUR = ["Rispondi a OGNI commento con una domanda","Rispondi subito ai DM (GUIDA / LISTA / IKIGAI)","Condividi il post in una storia","10 minuti di commenti su profili del target"];
+var GROWTH = ["10–15 profili caldi: like + commento, poi follow","Commenti di valore su 5–10 post di settore","Blocco DM 1 (sticker, GUIDA, LISTA)","Blocco DM 2 (sera)","Ratio check: seguiti ≤ follower"];
+var METRIC_FIELDS = [["r","Reach"],["v","Visual. reel"],["f","Follower netti"],["p","Visite profilo"],["t","Tap sul link"],["c","Commenti"],["s","Condivisioni"],["d","DM avviati"]];
+var METRIC_WEEKS = [["w1","S1"],["w2","S2"],["w3","S3"],["w4","S4"]];
+
+// ---------- STORAGE ----------
+// state = { content: {…SEED modificabile…}, checks:{}, metrics:{}, ratio:{} , seedVersion }
+var state = null;
+
+function deepClone(o){ return JSON.parse(JSON.stringify(o)); }
+
+function load(){
+  var raw=null;
+  try{ raw=localStorage.getItem(STORE_KEY); }catch(e){}
+  if(raw){
+    try{ state=JSON.parse(raw); }catch(e){ state=null; }
+  }
+  if(!state){
+    state={ content:deepClone(SEED), checks:{}, metrics:{}, ratio:{fo:"",fi:""}, seedVersion:SEED_VERSION };
+  }
+  // se non c'è content (vecchio formato) o manca, inizializza
+  if(!state.content){ state.content=deepClone(SEED); }
+  if(!state.checks) state.checks={};
+  if(!state.metrics) state.metrics={};
+  if(!state.ratio) state.ratio={fo:"",fi:""};
+}
+function save(){
+  try{ localStorage.setItem(STORE_KEY,JSON.stringify(state)); }catch(e){
+    toast("Spazio pieno: libera memoria");
+  }
+}
+
+// ---------- UTIL ----------
+function el(html){ var d=document.createElement("div"); d.innerHTML=html.trim(); return d.firstChild; }
+function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function todayStr(){ var d=new Date(); var m=("0"+(d.getMonth()+1)).slice(-2); var dd=("0"+d.getDate()).slice(-2); return d.getFullYear()+"-"+m+"-"+dd; }
+function dkey(){ return todayStr(); }
+
+var toastT=null;
+function toast(msg){
+  var t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastT); toastT=setTimeout(function(){ t.classList.remove("show"); },1700);
+}
+
+function copyText(txt,btn){
+  function ok(){ if(btn){ btn.classList.add("ok"); btn.textContent="Copiato"; setTimeout(function(){ btn.classList.remove("ok"); btn.textContent="Copia"; },1500);} }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(ok,function(){ fallback(); });
+  } else { fallback(); }
+  function fallback(){
+    var ta=document.createElement("textarea"); ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try{ document.execCommand("copy"); ok(); }catch(e){ toast("Copia non riuscita"); }
+    document.body.removeChild(ta);
+  }
+}
+
+
+// expose minime per onclick inline
+// __sp: contenitore handler per onclick inline. I metodi che dipendono da
+// funzioni definite in parte 2 vengono assegnati la' (window.__sp.xxx=...).
+window.__sp = window.__sp || {};
+window.__sp.copy = function(b){ copyText((b.getAttribute("data-t")||"").replace(/\\n/g,"\n"), b); };
+
+// ---------- (continua in app2.js) ----------
+window.__SEED=SEED; window.__state=function(){return state;};
+window.__consts={PILLARS:PILLARS,PILLAR_KEYS:PILLAR_KEYS,FIRST_HOUR:FIRST_HOUR,GROWTH:GROWTH,METRIC_FIELDS:METRIC_FIELDS,METRIC_WEEKS:METRIC_WEEKS};
+window.__util={el:el,esc:esc,todayStr:todayStr,dkey:dkey,toast:toast,save:save,deepClone:deepClone};
+
+var openDays={}, openRetro=false;
+window.__ui={getOpenDays:function(){return openDays;},getOpenRetro:function(){return openRetro;}};
+
+load();
+})();
+
+/* Collegamento stato fra app1 e app2 */
+(function(){
+  window.__replaceState=function(s){
+    // sostituisce lo stato interno mantenendo il riferimento usato dai render
+    var cur=window.__state();
+    cur.content=s.content||cur.content;
+    cur.checks=s.checks||{}; cur.metrics=s.metrics||{}; cur.ratio=s.ratio||{fo:"",fi:""};
+  };
+})();
+
+/* ============================================================
+   SPADANO PLANNER — render + editor (parte 2)
+   ============================================================ */
+(function(){
+"use strict";
+var C=window.__consts, U=window.__util, UI=window.__ui;
+var PILLARS=C.PILLARS, PILLAR_KEYS=C.PILLAR_KEYS;
+var esc=U.esc, save=U.save, toast=U.toast, deepClone=U.deepClone;
+
+function st(){ return window.__state(); }
+function appEl(){ return document.getElementById("app"); }
+
+// ---------- COMPONENTI HTML ----------
+function copyBlock(l,t){
+  var safe=esc(t).replace(/\n/g,"&#10;");
+  return '<div class="copy"><div class="copy-h"><span>'+esc(l)+'</span>'+
+    '<button class="copy-btn" data-t="'+esc(t).replace(/\n/g,"\\n")+'" onclick="__sp.copy(this)">Copia</button></div>'+
+    '<pre>'+esc(t)+'</pre></div>';
+}
+function chkRow(id,lab,dark){
+  var on=!!st().checks[id];
+  return '<div class="chk'+(on?" done":"")+(dark?" dark":"")+'" onclick="__sp.toggle(\''+id+'\')">'+
+    '<span class="box'+(on?" on":"")+'"></span><span class="x">'+esc(lab)+'</span></div>';
+}
+function badge(bg,txt){ return '<span class="badge" style="background:'+bg+'">'+esc(txt)+'</span>'; }
+function badgeLt(txt){ return '<span class="badge lt">'+esc(txt)+'</span>'; }
+
+function dayCard(d,forceOpen,weekHash){
+  var open=forceOpen||UI.getOpenDays()[d.id];
+  var ids=(d.tasks||[]).map(function(_,i){return "t:"+d.id+":"+i;});
+  var done=ids.filter(function(i){return st().checks[i];}).length;
+  var today=d.date===U.todayStr();
+  var P=PILLARS[d.pillar]||PILLARS.storia;
+  var h='<div class="day'+(today?" today":"")+'" style="border-left-color:'+P.c+'">';
+  h+='<div class="day-head" onclick="'+(forceOpen?"":"__sp.toggleDay(\''+d.id+'\')")+'">';
+  h+='<div class="day-top"><div class="day-tags">';
+  h+='<span class="day-lab">'+esc(d.lab)+'</span>';
+  h+=badge(P.c,P.n)+badgeLt(d.type+(d.time?" · "+d.time:""));
+  if(today) h+=badge("#E8701A","OGGI");
+  if(d.drop) h+=badge("#8A8A8A","SALTABILE");
+  h+='</div><div style="display:flex;align-items:center;gap:6px"><span class="day-prog'+(done===ids.length&&ids.length?" done":"")+'">'+done+'/'+ids.length+'</span>';
+  if(!forceOpen) h+='<span style="color:#142038;font-size:13px">'+(open?"▲":"▼")+'</span>';
+  h+='</div></div>';
+  h+='<div class="day-title">'+esc(d.title)+'</div>';
+  if(d.q||d.cta){ h+='<div class="chips">'; if(d.cta)h+='<span class="chip dark">CTA · '+esc(d.cta)+'</span>'; if(d.q)h+='<span class="chip">Domanda · '+esc(d.q)+'</span>'; h+='</div>'; }
+  h+='</div>';
+  if(open){
+    h+='<div class="day-body">';
+    if(d.nota) h+='<div class="nota">'+esc(d.nota)+'</div>';
+    (d.copy||[]).forEach(function(c){ var t=c.t; if(weekHash && /caption/i.test(c.l)){ t=c.t+"\n\n"+weekHash; } h+=copyBlock(c.l,t); });
+    if(d.stories&&d.stories.length){
+      h+='<div class="lbl">Stories del giorno</div>';
+      d.stories.forEach(function(s,i){ h+='<div class="story-li"><span class="n">'+(i+1)+'.</span><span>'+esc(s)+'</span></div>'; });
+    }
+    h+='<div class="lbl" style="margin-top:8px">Checklist</div>';
+    (d.tasks||[]).forEach(function(t,i){ h+=chkRow(ids[i],t); });
+    h+='<button class="edit-pill" style="margin-top:10px" onclick="__sp.editDay(\''+d.id+'\')">✏︎ Modifica contenuto</button>';
+    h+='</div>';
+  }
+  h+='</div>';
+  return h;
+}
+
+function firstHourCard(){
+  var ids=C.FIRST_HOUR.map(function(_,i){return "fh:"+U.dkey()+":"+i;});
+  var done=ids.filter(function(i){return st().checks[i];}).length;
+  var h='<div class="navycard"><div class="nh"><span style="color:#E8701A;font-size:16px">🔥</span><span class="t">Protocollo prima ora</span><span class="p'+(done===4?" done":"")+'">'+done+'/4</span></div>';
+  h+='<div class="desc">I 60 minuti dopo la pubblicazione decidono la spinta dell\'algoritmo.</div>';
+  C.FIRST_HOUR.forEach(function(t,i){ h+=chkRow(ids[i],t,true); });
+  h+='</div>'; return h;
+}
+function growthCard(){
+  var ids=C.GROWTH.map(function(_,i){return "gr:"+U.dkey()+":"+i;});
+  var done=ids.filter(function(i){return st().checks[i];}).length;
+  var h='<div class="card"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span class="sec-title" style="font-size:13px">Crescita quotidiana</span><span class="day-prog'+(done===5?" done":"")+'" style="margin-left:auto">'+done+'/5</span></div>';
+  C.GROWTH.forEach(function(t,i){ h+=chkRow(ids[i],t); });
+  h+='</div>'; return h;
+}
+function triggerBanner(){
+  var m=st().content.meta;
+  return '<div class="banner"><div class="k">Mappa trigger</div><div class="t">'+m.triggers+'</div></div>';
+}
+
+// ---------- VISTE ----------
+function findToday(){
+  var ws=st().content.weeks, ts=U.todayStr();
+  for(var i=0;i<ws.length;i++) for(var j=0;j<ws[i].days.length;j++) if(ws[i].days[j].date===ts) return ws[i].days[j];
+  return null;
+}
+function retroDone(){ return st().content.retro.filter(function(r){return st().checks["chk:"+r.id];}).length; }
+
+function viewOggi(){
+  var h=triggerBanner();
+  var rd=retroDone(), rt=st().content.retro.length;
+  if(rd<rt){ h+='<div class="alert" onclick="__sp.tab(\'piano\')"><span style="flex:0 0 auto">⚠︎</span><span>Correzioni iniziali: '+rd+'/'+rt+' fatte → vai a DA FARE SUBITO</span></div>'; }
+  var d=findToday();
+  if(d){ var wh=""; st().content.weeks.forEach(function(w){ if(w.days.indexOf(d)>-1) wh=w.hash; }); h+=dayCard(d,true,wh); if(d.type==="REEL"||d.type==="CAROSELLO") h+=firstHourCard(); }
+  else { h+='<div class="card" style="font-size:13px">Oggi nessun contenuto in calendario. Le task di crescita quotidiana valgono comunque.</div>'; }
+  h+=growthCard();
+  return h;
+}
+
+function viewPiano(){
+  var c=st().content, h="";
+  var rd=retroDone(), rt=c.retro.length, open=UI.getOpenRetro();
+  h+='<div class="card" style="border-color:#E8701A;padding:0;overflow:hidden">';
+  h+='<div style="padding:10px 13px;display:flex;align-items:center;justify-content:space-between" onclick="__sp.toggleRetro()">';
+  h+='<div><div style="font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:-.3px;color:#142038">Da fare subito · correzioni</div><div style="font-size:11.5px;color:#9A9382">~30 minuti · profilo + primi commenti</div></div>';
+  h+='<div style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;font-weight:800;color:'+(rd===rt?"#27795B":"#E8701A")+'">'+rd+'/'+rt+'</span><span style="color:#142038">'+(open?"▲":"▼")+'</span></div></div>';
+  if(open){ h+='<div style="padding:0 13px 13px">';
+    c.retro.forEach(function(r){ h+=chkRow("chk:"+r.id,r.lab); if(r.copy) h+=copyBlock("Testo pronto",r.copy); });
+    h+='</div>'; }
+  h+='</div>';
+
+  c.weeks.forEach(function(w){
+    h+='<div style="margin-bottom:16px"><div style="padding:0 2px;margin-bottom:8px"><div class="sec-line"></div>';
+    h+='<div class="sec-title">Settimana '+w.n+' — '+esc(w.title)+'</div><div class="sec-sub">'+esc(w.goal)+'</div></div>';
+    w.days.forEach(function(d){ h+=dayCard(d,false,w.hash); });
+    if(w.hash){ h+=copyBlock("Hashtag Settimana "+w.n,w.hash); }
+    h+='<button class="btn-sec" onclick="__sp.newDay('+w.n+')">＋ Aggiungi contenuto alla Settimana '+w.n+'</button>';
+    h+='</div>';
+  });
+  h+='<button class="btn-sec" style="margin-bottom:12px" onclick="__sp.newDay(null)">＋ Crea una nuova settimana / mese</button>';
+  return h;
+}
+
+function viewCopy(){
+  var c=st().content, h=triggerBanner();
+  c.dm.forEach(function(g){
+    h+='<div style="margin-bottom:16px"><div class="sec-line"></div><div class="sec-title" style="margin-bottom:8px">'+esc(g.g)+'</div>';
+    g.items.forEach(function(it){ h+=copyBlock(it.l,it.t); });
+    h+='</div>';
+  });
+  h+='<div style="margin-bottom:16px"><div class="sec-line"></div><div class="sec-title" style="margin-bottom:8px">Call da 15 minuti</div>';
+  c.call.forEach(function(x,i){ h+='<div class="story-li"><span class="n">'+(i+1)+'.</span><span>'+esc(x)+'</span></div>'; });
+  h+='</div>';
+  h+='<div style="margin-bottom:16px"><div class="sec-line"></div><div class="sec-title" style="margin-bottom:8px">Hashtag</div>';
+  c.hash.forEach(function(x){ h+=copyBlock(x.l,x.t); });
+  h+='</div>';
+  h+='<div class="banner" style="background:#FBEFE2;border:1px solid #E4DCCB"><div class="t" style="color:#142038">I 3 segnaposto <b>___</b> nel piano (barattoli · ore seduto · anni rimandati) vanno riempiti coi tuoi numeri veri. Posti usati ovunque: <b>5</b>.</div></div>';
+  return h;
+}
+
+function viewDati(){
+  var s=st();
+  var fo=parseInt(s.ratio.fo||"0",10), fi=parseInt(s.ratio.fi||"0",10);
+  var hasR=s.ratio.fo!==""&&s.ratio.fi!=="";
+  var rCol="#8A8A8A", rTxt="Inserisci i numeri";
+  if(hasR){ if(fi<=fo){rCol="#27795B";rTxt="OK — seguiti ≤ follower";}
+    else if(fi<=fo*1.1){rCol="#B8791F";rTxt="Quasi — rallenta i follow";}
+    else{rCol="#C0392B";rTxt="Troppi seguiti: stop ai follow";} }
+  var h='<div class="card"><div class="sec-title" style="font-size:13px;margin-bottom:6px">Ratio follower / seguiti</div>';
+  h+='<div class="row2"><input class="inp" inputmode="numeric" placeholder="Follower" value="'+esc(s.ratio.fo)+'" oninput="__sp.setRatio(\'fo\',this.value)">';
+  h+='<input class="inp" inputmode="numeric" placeholder="Seguiti" value="'+esc(s.ratio.fi)+'" oninput="__sp.setRatio(\'fi\',this.value)"></div>';
+  h+='<div style="display:flex;align-items:center;gap:8px"><span class="dot" style="background:'+rCol+'"></span><span style="font-size:12.5px;font-weight:700;color:'+rCol+'">'+rTxt+'</span></div></div>';
+
+  h+='<div class="card"><div class="sec-title" style="font-size:13px">Gli 8 numeri del lunedì</div>';
+  h+='<div style="font-size:11.5px;color:#9A9382;margin:2px 0 8px">Compila a fine settimana. Gate ads: ≥5 commenti/post.</div>';
+  h+='<div style="overflow-x:auto"><table class="metrics"><thead><tr><th class="l">Metrica</th>';
+  C.METRIC_WEEKS.forEach(function(w){ h+='<th>'+w[1]+'</th>'; });
+  h+='</tr></thead><tbody>';
+  C.METRIC_FIELDS.forEach(function(f){
+    h+='<tr><td class="l">'+f[1]+'</td>';
+    C.METRIC_WEEKS.forEach(function(w){
+      var v=(s.metrics[w[0]]&&s.metrics[w[0]][f[0]])||"";
+      h+='<td><input class="mini" inputmode="numeric" value="'+esc(v)+'" oninput="__sp.setMetric(\''+w[0]+'\',\''+f[0]+'\',this.value)"></td>';
+    });
+    h+='</tr>';
+  });
+  h+='</tbody></table></div>';
+  // insights
+  function num(w,f){ return parseInt((s.metrics[w]&&s.metrics[w][f])||"",10); }
+  var ins=[];
+  for(var i=1;i<C.METRIC_WEEKS.length;i++){
+    var a=C.METRIC_WEEKS[i-1][0],b=C.METRIC_WEEKS[i][0],lbl=C.METRIC_WEEKS[i][1];
+    var ca=num(a,"c"),cb=num(b,"c");
+    if(!isNaN(ca)&&!isNaN(cb)) ins.push("Commenti "+lbl+": "+(cb>=ca?"+":"")+(cb-ca)+" vs prima "+(cb>ca?"✓":"→ rinforza CTA"));
+    var da=num(a,"d"),db=num(b,"d");
+    if(!isNaN(da)&&!isNaN(db)) ins.push("DM "+lbl+": "+(db>=da?"+":"")+(db-da)+" vs prima");
+  }
+  if(ins.length){ h+='<div class="insights">'; ins.forEach(function(x){ h+='<div>'+esc(x)+'</div>'; }); h+='</div>'; }
+  h+='</div>';
+
+  h+='<button class="reset" id="resetBtn" onclick="__sp.reset()">↺ Azzera spunte e dati</button>';
+  return h;
+}
+
+// ---------- RENDER PRINCIPALE ----------
+function render(){
+  var c=st().content;
+  var h='<div class="hdr"><div class="hdr-row"><div><h1>Spadano <span>Planner</span></h1></div><div class="gear" onclick="__sp.openMenu()">⚙︎</div></div>';
+  h+='<div class="rule"></div><div class="sub">'+esc(c.meta.title)+' · '+esc(c.meta.subtitle)+'</div></div>';
+  var tabs=[["oggi","Oggi"],["piano","Piano"],["copy","Copy"],["dati","Dati"]];
+  h+='<div class="tabs">';
+  tabs.forEach(function(t){ h+='<div class="tab'+(window.__tab===t[0]?" on":"")+'" onclick="__sp.tab(\''+t[0]+'\')">'+t[1]+'</div>'; });
+  h+='</div><div id="view"></div>';
+  h+='<div class="footnote">I dati restano su questo iPhone. Modifica i contenuti col tasto ＋ o la matita.</div>';
+  appEl().innerHTML=h;
+  var v=document.getElementById("view");
+  if(window.__tab==="oggi") v.innerHTML=viewOggi();
+  else if(window.__tab==="piano") v.innerHTML=viewPiano();
+  else if(window.__tab==="copy") v.innerHTML=viewCopy();
+  else v.innerHTML=viewDati();
+}
+window.__render=render;
+function renderDati(){ if(window.__tab==="dati"){ var v=document.getElementById("view"); if(v) v.innerHTML=viewDati(); } }
+window.__renderDati=renderDati;
+
+// ---------- TAB STATE ----------
+window.__tab="oggi";
+window.__sp.tab=function(t){ window.__tab=t; render(); window.scrollTo(0,0); };
+
+// ---------- RESET ----------
+var resetArm=false;
+window.__sp.reset=function(){
+  var b=document.getElementById("resetBtn");
+  if(!resetArm){ resetArm=true; b.classList.add("arm"); b.textContent="Sicuro? Tocca di nuovo"; setTimeout(function(){resetArm=false;if(b){b.classList.remove("arm");b.textContent="↺ Azzera spunte e dati";}},3500); return; }
+  st().checks={}; st().metrics={}; st().ratio={fo:"",fi:""}; save(); resetArm=false; render();
+  toast("Spunte e dati azzerati");
+};
+
+// ============================================================
+//  EDITOR (bottom sheet)
+// ============================================================
+var sheet=document.getElementById("sheet"), sheetBg=document.getElementById("sheetBg");
+function openSheetHTML(html){ sheet.innerHTML='<div class="sheet-grip"></div>'+html; sheetBg.classList.add("show"); sheet.classList.add("show"); }
+function closeSheet(){ sheet.classList.remove("show"); sheetBg.classList.remove("show"); }
+window.__sp.closeSheet=closeSheet;
+sheetBg.onclick=closeSheet;
+
+function findDay(id){
+  var ws=st().content.weeks;
+  for(var i=0;i<ws.length;i++) for(var j=0;j<ws[i].days.length;j++) if(ws[i].days[j].id===id) return {d:ws[i].days[j],w:ws[i],wi:i,di:j};
+  return null;
+}
+
+function copyEditorRows(copyArr){
+  var h='<div id="copyRows">';
+  copyArr.forEach(function(c,i){ h+=copyRowHTML(c.l,c.t,i); });
+  h+='</div>';
+  h+='<button class="mini-act" style="margin-top:2px" onclick="__sp.addCopyRow()">＋ Aggiungi un blocco di testo</button>';
+  return h;
+}
+function copyRowHTML(l,t,i){
+  return '<div class="copy-list-item" data-row="'+i+'"><div class="grow">'+
+    '<input class="cr-l" placeholder="Etichetta (es. Caption)" value="'+esc(l)+'" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid #C9BFA9;font-size:15px;margin-bottom:6px">'+
+    '<textarea class="cr-t" placeholder="Testo da copiare" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid #C9BFA9;font-size:15px;min-height:70px;line-height:1.4">'+esc(t)+'</textarea>'+
+    '</div><button class="mini-act" style="background:#fff;color:#C0392B" onclick="this.closest(\'.copy-list-item\').remove()">✕</button></div>';
+}
+window.__sp.addCopyRow=function(){
+  var box=document.getElementById("copyRows");
+  var i=box.children.length;
+  box.appendChild(window.__util.el(copyRowHTML("","",i)));
+};
+
+function readCopyRows(){
+  var rows=document.querySelectorAll("#copyRows .copy-list-item"), out=[];
+  rows.forEach(function(r){
+    var l=r.querySelector(".cr-l").value.trim();
+    var t=r.querySelector(".cr-t").value;
+    if(l||t.trim()) out.push({l:l||"Testo",t:t});
+  });
+  return out;
+}
+
+function pillarOptions(sel){
+  return PILLAR_KEYS.map(function(k){ return '<option value="'+k+'"'+(k===sel?" selected":"")+'>'+PILLARS[k].n+'</option>'; }).join("");
+}
+
+function dayFormHTML(d,isNew,weekN){
+  var h='<h2>'+(isNew?"Nuovo contenuto":"Modifica contenuto")+'</h2>';
+  h+='<div class="hint">Tutto quello che scrivi qui finisce nel Piano e, se è la data di oggi, nella tab Oggi.</div>';
+  h+='<div class="field"><label>Etichetta giorno</label><input id="f-lab" placeholder="es. LUN 29" value="'+esc(d.lab||"")+'"></div>';
+  h+='<div class="row2"><div class="field" style="flex:1"><label>Data</label><input id="f-date" type="date" value="'+esc(d.date||"")+'"></div>';
+  h+='<div class="field" style="flex:1"><label>Ora</label><input id="f-time" placeholder="18:30" value="'+esc(d.time||"")+'"></div></div>';
+  h+='<div class="row2"><div class="field" style="flex:1"><label>Tipo</label><select id="f-type">';
+  ["REEL","CAROSELLO","STORIES","POST"].forEach(function(x){ h+='<option'+(d.type===x?" selected":"")+'>'+x+'</option>'; });
+  h+='</select></div><div class="field" style="flex:1"><label>Pilastro</label><select id="f-pillar">'+pillarOptions(d.pillar||"storia")+'</select></div></div>';
+  h+='<div class="field"><label>Titolo / tema</label><input id="f-title" placeholder="Tema del contenuto" value="'+esc(d.title||"")+'"></div>';
+  h+='<div class="row2"><div class="field" style="flex:1"><label>CTA</label><input id="f-cta" placeholder="es. Commenta GUIDA" value="'+esc(d.cta||"")+'"></div>';
+  h+='<div class="field" style="flex:1"><label>Domanda (binaria/num.)</label><input id="f-q" placeholder="es. SÌ o NO" value="'+esc(d.q||"")+'"></div></div>';
+  h+='<div class="field"><label>Nota</label><textarea id="f-nota" placeholder="Promemoria operativo (facoltativo)">'+esc(d.nota||"")+'</textarea></div>';
+  h+='<div class="field"><label>Blocchi di testo da copiare (script, caption, primo commento…)</label>'+copyEditorRows(d.copy||[])+'</div>';
+  h+='<div class="field"><label>Stories del giorno — una per riga</label><textarea id="f-stories" placeholder="Una storia per riga" style="min-height:90px">'+esc((d.stories||[]).join("\n"))+'</textarea></div>';
+  h+='<div class="field"><label>Checklist — una voce per riga</label><textarea id="f-tasks" placeholder="Una voce per riga" style="min-height:90px">'+esc((d.tasks||[]).join("\n"))+'</textarea><div class="help">Se la lasci vuota, uso una checklist standard.</div></div>';
+  h+='<button class="btn-pri" onclick="__sp.saveDay(\''+(d.id||"")+'\','+(isNew?"true":"false")+','+(weekN===null?"null":weekN)+')">Salva</button>';
+  if(!isNew) h+='<button class="btn-del" onclick="__sp.deleteDay(\''+d.id+'\')">Elimina questo contenuto</button>';
+  h+='<button class="btn-sec" onclick="__sp.closeSheet()">Annulla</button>';
+  return h;
+}
+
+function openEditDay(id){
+  var f=findDay(id); if(!f) return;
+  openSheetHTML(dayFormHTML(f.d,false,f.w.n));
+}
+function openNewDay(weekN){
+  openSheetHTML(dayFormHTML({},true,weekN));
+}
+window.__sp.editDay=openEditDay;
+window.__sp.newDay=openNewDay;
+
+window.__sp.saveDay=function(id,isNew,weekN){
+  function val(x){ var e=document.getElementById(x); return e?e.value:""; }
+  var lines=function(x){ return val(x).split("\n").map(function(s){return s.trim();}).filter(Boolean); };
+  var obj={
+    lab:val("f-lab")||"NUOVO", date:val("f-date"), time:val("f-time"),
+    type:val("f-type"), pillar:val("f-pillar"), title:val("f-title")||"(senza titolo)",
+    cta:val("f-cta"), q:val("f-q"), nota:val("f-nota"),
+    copy:readCopyRows(),
+    stories:lines("f-stories"),
+    tasks:lines("f-tasks")
+  };
+  if(!obj.tasks.length) obj.tasks=["Girato","Pubblicato in orario","Primo commento fissato","Prima ora completata","Stories del giorno","DM a chi vota / commenta"];
+  var ws=st().content.weeks;
+  if(isNew){
+    obj.id="d"+Date.now();
+    var tw=null;
+    if(weekN!==null){ for(var i=0;i<ws.length;i++) if(ws[i].n===weekN) tw=ws[i]; }
+    if(!tw){ tw=ws[ws.length-1]; }
+    tw.days.push(obj);
+    // riordina per data
+    tw.days.sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); });
+    toast("Contenuto aggiunto");
+  } else {
+    var f=findDay(id); if(f){ obj.id=id; ws[f.wi].days[f.di]=obj; }
+    f && ws[f.wi].days.sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); });
+    toast("Contenuto aggiornato");
+  }
+  save(); closeSheet(); render();
+};
+
+window.__sp.deleteDay=function(id){
+  var f=findDay(id); if(!f) return;
+  if(!window.confirm("Eliminare «"+f.d.title+"»? L'azione non si annulla.")) return;
+  st().content.weeks[f.wi].days.splice(f.di,1);
+  save(); closeSheet(); render(); toast("Contenuto eliminato");
+};
+
+// ---------- NUOVA SETTIMANA ----------
+window.__sp.newDay=function(weekN){
+  if(weekN===null){ openNewWeek(); return; }
+  openNewDay(weekN);
+};
+function openNewWeek(){
+  var h='<h2>Nuova settimana</h2><div class="hint">Crea il contenitore di una nuova settimana o di un mese nuovo. Poi ci aggiungi i contenuti.</div>';
+  var maxN=0; st().content.weeks.forEach(function(w){ if(w.n>maxN)maxN=w.n; });
+  h+='<div class="field"><label>Numero settimana</label><input id="w-n" type="number" value="'+(maxN+1)+'"></div>';
+  h+='<div class="field"><label>Titolo</label><input id="w-title" placeholder="es. Costruzione community"></div>';
+  h+='<div class="field"><label>Obiettivo della settimana</label><textarea id="w-goal" placeholder="A cosa serve questa settimana"></textarea></div>';
+  h+='<div class="field"><label>Hashtag della settimana</label><textarea id="w-hash" placeholder="#spadanocoaching #naturalbb ..."></textarea></div>';
+  h+='<button class="btn-pri" onclick="__sp.saveWeek()">Crea settimana</button>';
+  h+='<button class="btn-sec" onclick="__sp.closeSheet()">Annulla</button>';
+  openSheetHTML(h);
+}
+window.__sp.saveWeek=function(){
+  function val(x){var e=document.getElementById(x);return e?e.value:"";}
+  var n=parseInt(val("w-n"),10)||(st().content.weeks.length+1);
+  st().content.weeks.push({n:n,title:val("w-title")||"Nuova settimana",goal:val("w-goal")||"",hash:val("w-hash")||"",days:[]});
+  st().content.weeks.sort(function(a,b){return a.n-b.n;});
+  save(); closeSheet(); render(); toast("Settimana creata");
+};
+
+// ---------- MENU IMPOSTAZIONI ----------
+function openMenu(){
+  var c=st().content;
+  var h='<h2>Impostazioni</h2><div class="hint">Intestazione del piano, esporta/importa i contenuti, ricomincia da capo.</div>';
+  h+='<div class="field"><label>Titolo del piano</label><input id="m-title" value="'+esc(c.meta.title)+'"></div>';
+  h+='<div class="field"><label>Sottotitolo (periodo)</label><input id="m-sub" value="'+esc(c.meta.subtitle)+'"></div>';
+  h+='<div class="field"><label>Riga «Mappa trigger»</label><textarea id="m-trig" style="min-height:70px">'+esc(c.meta.triggers.replace(/<\/?b>/g,"*"))+'</textarea><div class="help">Usa *asterischi* per il grassetto.</div></div>';
+  h+='<button class="btn-pri" onclick="__sp.saveMeta()">Salva intestazione</button>';
+  h+='<button class="btn-sec" onclick="__sp.exportData()">⬇︎ Esporta tutti i contenuti (backup)</button>';
+  h+='<button class="btn-sec" onclick="document.getElementById(\'importFile\').click()">⬆︎ Importa da backup</button>';
+  h+='<input type="file" id="importFile" accept="application/json" style="display:none" onchange="__sp.importData(this)">';
+  h+='<button class="btn-del" onclick="__sp.factoryReset()">Ripristina il piano originale (v6)</button>';
+  h+='<button class="btn-sec" onclick="__sp.closeSheet()">Chiudi</button>';
+  openSheetHTML(h);
+}
+window.__sp.openMenu=openMenu;
+window.__sp.saveMeta=function(){
+  function val(x){var e=document.getElementById(x);return e?e.value:"";}
+  var c=st().content;
+  c.meta.title=val("m-title")||c.meta.title;
+  c.meta.subtitle=val("m-sub");
+  c.meta.triggers=esc(val("m-trig")).replace(/\*(.+?)\*/g,"<b>$1</b>");
+  save(); closeSheet(); render(); toast("Intestazione salvata");
+};
+window.__sp.exportData=function(){
+  var blob=new Blob([JSON.stringify(st(),null,2)],{type:"application/json"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a"); a.href=url;
+  a.download="spadano-planner-backup-"+U.todayStr()+".json";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url); toast("Backup esportato");
+};
+window.__sp.importData=function(input){
+  var file=input.files[0]; if(!file) return;
+  var r=new FileReader();
+  r.onload=function(){ try{ var data=JSON.parse(r.result);
+      if(data.content){ window.__setState(data); save(); closeSheet(); render(); toast("Backup importato"); }
+      else toast("File non valido"); }catch(e){ toast("File non leggibile"); } };
+  r.readAsText(file);
+};
+window.__sp.factoryReset=function(){
+  if(!window.confirm("Ripristinare il piano originale v6? Perdi le modifiche ai contenuti (le spunte restano).")) return;
+  st().content=deepClone(window.__SEED); save(); closeSheet(); render(); toast("Piano originale ripristinato");
+};
+window.__setState=function(s){ window.__replaceState(s); };
+
+// ---------- BOOT ----------
+document.getElementById("fab").onclick=function(){
+  if(window.__tab==="piano"){ openNewDay(st().content.weeks[st().content.weeks.length-1].n); }
+  else { window.__tab="piano"; render(); window.scrollTo(0,0); setTimeout(function(){ openNewDay(st().content.weeks[st().content.weeks.length-1].n); },50); }
+};
+
+render();
+
+// ---------- SERVICE WORKER ----------
+if("serviceWorker" in navigator){
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("sw.js").then(function(reg){
+      reg.addEventListener("updatefound",function(){
+        var nw=reg.installing;
+        nw && nw.addEventListener("statechange",function(){
+          if(nw.state==="installed" && navigator.serviceWorker.controller){
+            document.getElementById("updateBar").classList.add("show");
+          }
+        });
+      });
+    }).catch(function(){});
+  });
+}
+
+})();
+
+</script>
+</body>
+</html>
