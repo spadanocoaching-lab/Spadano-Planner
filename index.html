@@ -626,12 +626,12 @@ function appEl(){ return document.getElementById("app"); }
 function copyBlock(l,t){
   var safe=esc(t).replace(/\n/g,"&#10;");
   return '<div class="copy"><div class="copy-h"><span>'+esc(l)+'</span>'+
-    '<button class="copy-btn" data-t="'+esc(t).replace(/\n/g,"\\n")+'" onclick="__sp.copy(this)">Copia</button></div>'+
+    '<button class="copy-btn" data-t="'+esc(t).replace(/\n/g,"\\n")+'" data-act="copy">Copia</button></div>'+
     '<pre>'+esc(t)+'</pre></div>';
 }
 function chkRow(id,lab,dark){
   var on=!!st().checks[id];
-  return '<div class="chk'+(on?" done":"")+(dark?" dark":"")+'" onclick="__sp.toggle(\''+id+'\')">'+
+  return '<div class="chk'+(on?" done":"")+(dark?" dark":"")+'" data-act="toggle" data-arg="'+id+'">'+
     '<span class="box'+(on?" on":"")+'"></span><span class="x">'+esc(lab)+'</span></div>';
 }
 function badge(bg,txt){ return '<span class="badge" style="background:'+bg+'">'+esc(txt)+'</span>'; }
@@ -644,7 +644,7 @@ function dayCard(d,forceOpen,weekHash){
   var today=d.date===U.todayStr();
   var P=PILLARS[d.pillar]||PILLARS.storia;
   var h='<div class="day'+(today?" today":"")+'" style="border-left-color:'+P.c+'">';
-  h+='<div class="day-head" onclick="'+(forceOpen?"":"__sp.toggleDay(\''+d.id+'\')")+'">';
+  h+='<div class="day-head"'+(forceOpen?"":' data-act="toggleDay" data-arg="'+d.id+'"')+'>';
   h+='<div class="day-top"><div class="day-tags">';
   h+='<span class="day-lab">'+esc(d.lab)+'</span>';
   h+=badge(P.c,P.n)+badgeLt(d.type+(d.time?" · "+d.time:""));
@@ -666,7 +666,7 @@ function dayCard(d,forceOpen,weekHash){
     }
     h+='<div class="lbl" style="margin-top:8px">Checklist</div>';
     (d.tasks||[]).forEach(function(t,i){ h+=chkRow(ids[i],t); });
-    h+='<button class="edit-pill" style="margin-top:10px" onclick="__sp.editDay(\''+d.id+'\')">✏︎ Modifica contenuto</button>';
+    h+='<button class="edit-pill" style="margin-top:10px" data-act="editDay" data-arg="'+d.id+'">✏︎ Modifica contenuto</button>';
     h+='</div>';
   }
   h+='</div>';
@@ -704,7 +704,7 @@ function retroDone(){ return st().content.retro.filter(function(r){return st().c
 function viewOggi(){
   var h=triggerBanner();
   var rd=retroDone(), rt=st().content.retro.length;
-  if(rd<rt){ h+='<div class="alert" onclick="__sp.tab(\'piano\')"><span style="flex:0 0 auto">⚠︎</span><span>Correzioni iniziali: '+rd+'/'+rt+' fatte → vai a DA FARE SUBITO</span></div>'; }
+  if(rd<rt){ h+='<div class="alert" data-act="tab" data-arg="piano"><span style="flex:0 0 auto">⚠︎</span><span>Correzioni iniziali: '+rd+'/'+rt+' fatte → vai a DA FARE SUBITO</span></div>'; }
   var d=findToday();
   if(d){ var wh=""; st().content.weeks.forEach(function(w){ if(w.days.indexOf(d)>-1) wh=w.hash; }); h+=dayCard(d,true,wh); if(d.type==="REEL"||d.type==="CAROSELLO") h+=firstHourCard(); }
   else { h+='<div class="card" style="font-size:13px">Oggi nessun contenuto in calendario. Le task di crescita quotidiana valgono comunque.</div>'; }
@@ -716,7 +716,7 @@ function viewPiano(){
   var c=st().content, h="";
   var rd=retroDone(), rt=c.retro.length, open=UI.getOpenRetro();
   h+='<div class="card" style="border-color:#E8701A;padding:0;overflow:hidden">';
-  h+='<div style="padding:10px 13px;display:flex;align-items:center;justify-content:space-between" onclick="__sp.toggleRetro()">';
+  h+='<div style="padding:10px 13px;display:flex;align-items:center;justify-content:space-between" data-act="toggleRetro">';
   h+='<div><div style="font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:-.3px;color:#142038">Da fare subito · correzioni</div><div style="font-size:11.5px;color:#9A9382">~30 minuti · profilo + primi commenti</div></div>';
   h+='<div style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;font-weight:800;color:'+(rd===rt?"#27795B":"#E8701A")+'">'+rd+'/'+rt+'</span><span style="color:#142038">'+(open?"▲":"▼")+'</span></div></div>';
   if(open){ h+='<div style="padding:0 13px 13px">';
@@ -729,10 +729,10 @@ function viewPiano(){
     h+='<div class="sec-title">Settimana '+w.n+' — '+esc(w.title)+'</div><div class="sec-sub">'+esc(w.goal)+'</div></div>';
     w.days.forEach(function(d){ h+=dayCard(d,false,w.hash); });
     if(w.hash){ h+=copyBlock("Hashtag Settimana "+w.n,w.hash); }
-    h+='<button class="btn-sec" onclick="__sp.newDay('+w.n+')">＋ Aggiungi contenuto alla Settimana '+w.n+'</button>';
+    h+='<button class="btn-sec" data-act="newDay" data-arg="'+w.n+'">＋ Aggiungi contenuto alla Settimana '+w.n+'</button>';
     h+='</div>';
   });
-  h+='<button class="btn-sec" style="margin-bottom:12px" onclick="__sp.newDay(null)">＋ Crea una nuova settimana / mese</button>';
+  h+='<button class="btn-sec" style="margin-bottom:12px" data-act="newWeek">＋ Crea una nuova settimana / mese</button>';
   return h;
 }
 
@@ -762,8 +762,8 @@ function viewDati(){
     else if(fi<=fo*1.1){rCol="#B8791F";rTxt="Quasi — rallenta i follow";}
     else{rCol="#C0392B";rTxt="Troppi seguiti: stop ai follow";} }
   var h='<div class="card"><div class="sec-title" style="font-size:13px;margin-bottom:6px">Ratio follower / seguiti</div>';
-  h+='<div class="row2"><input class="inp" inputmode="numeric" placeholder="Follower" value="'+esc(s.ratio.fo)+'" oninput="__sp.setRatio(\'fo\',this.value)">';
-  h+='<input class="inp" inputmode="numeric" placeholder="Seguiti" value="'+esc(s.ratio.fi)+'" oninput="__sp.setRatio(\'fi\',this.value)"></div>';
+  h+='<div class="row2"><input class="inp" inputmode="numeric" placeholder="Follower" value="'+esc(s.ratio.fo)+'" data-inp="ratio" data-arg="fo">';
+  h+='<input class="inp" inputmode="numeric" placeholder="Seguiti" value="'+esc(s.ratio.fi)+'" data-inp="ratio" data-arg="fi"></div>';
   h+='<div style="display:flex;align-items:center;gap:8px"><span class="dot" style="background:'+rCol+'"></span><span style="font-size:12.5px;font-weight:700;color:'+rCol+'">'+rTxt+'</span></div></div>';
 
   h+='<div class="card"><div class="sec-title" style="font-size:13px">Gli 8 numeri del lunedì</div>';
@@ -775,7 +775,7 @@ function viewDati(){
     h+='<tr><td class="l">'+f[1]+'</td>';
     C.METRIC_WEEKS.forEach(function(w){
       var v=(s.metrics[w[0]]&&s.metrics[w[0]][f[0]])||"";
-      h+='<td><input class="mini" inputmode="numeric" value="'+esc(v)+'" oninput="__sp.setMetric(\''+w[0]+'\',\''+f[0]+'\',this.value)"></td>';
+      h+='<td><input class="mini" inputmode="numeric" value="'+esc(v)+'" data-inp="metric" data-arg="'+w[0]+'" data-arg2="'+f[0]+'"></td>';
     });
     h+='</tr>';
   });
@@ -793,18 +793,18 @@ function viewDati(){
   if(ins.length){ h+='<div class="insights">'; ins.forEach(function(x){ h+='<div>'+esc(x)+'</div>'; }); h+='</div>'; }
   h+='</div>';
 
-  h+='<button class="reset" id="resetBtn" onclick="__sp.reset()">↺ Azzera spunte e dati</button>';
+  h+='<button class="reset" id="resetBtn" data-act="reset">↺ Azzera spunte e dati</button>';
   return h;
 }
 
 // ---------- RENDER PRINCIPALE ----------
 function render(){
   var c=st().content;
-  var h='<div class="hdr"><div class="hdr-row"><div><h1>Spadano <span>Planner</span></h1></div><div class="gear" onclick="__sp.openMenu()">⚙︎</div></div>';
+  var h='<div class="hdr"><div class="hdr-row"><div><h1>Spadano <span>Planner</span></h1></div><div class="gear" data-act="openMenu">⚙︎</div></div>';
   h+='<div class="rule"></div><div class="sub">'+esc(c.meta.title)+' · '+esc(c.meta.subtitle)+'</div></div>';
   var tabs=[["oggi","Oggi"],["piano","Piano"],["copy","Copy"],["dati","Dati"]];
   h+='<div class="tabs">';
-  tabs.forEach(function(t){ h+='<div class="tab'+(window.__tab===t[0]?" on":"")+'" onclick="__sp.tab(\''+t[0]+'\')">'+t[1]+'</div>'; });
+  tabs.forEach(function(t){ h+='<div class="tab'+(window.__tab===t[0]?" on":"")+'" data-act="tab" data-arg="'+t[0]+'">'+t[1]+'</div>'; });
   h+='</div><div id="view"></div>';
   h+='<div class="footnote">I dati restano su questo iPhone. Modifica i contenuti col tasto ＋ o la matita.</div>';
   appEl().innerHTML=h;
@@ -857,14 +857,14 @@ function copyEditorRows(copyArr){
   var h='<div id="copyRows">';
   copyArr.forEach(function(c,i){ h+=copyRowHTML(c.l,c.t,i); });
   h+='</div>';
-  h+='<button class="mini-act" style="margin-top:2px" onclick="__sp.addCopyRow()">＋ Aggiungi un blocco di testo</button>';
+  h+='<button class="mini-act" style="margin-top:2px" data-act="addCopyRow">＋ Aggiungi un blocco di testo</button>';
   return h;
 }
 function copyRowHTML(l,t,i){
   return '<div class="copy-list-item" data-row="'+i+'"><div class="grow">'+
     '<input class="cr-l" placeholder="Etichetta (es. Caption)" value="'+esc(l)+'" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid #C9BFA9;font-size:15px;margin-bottom:6px">'+
     '<textarea class="cr-t" placeholder="Testo da copiare" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid #C9BFA9;font-size:15px;min-height:70px;line-height:1.4">'+esc(t)+'</textarea>'+
-    '</div><button class="mini-act" style="background:#fff;color:#C0392B" onclick="this.closest(\'.copy-list-item\').remove()">✕</button></div>';
+    '</div><button class="mini-act" style="background:#fff;color:#C0392B" data-act="removeCopyRow">✕</button></div>';
 }
 window.__sp.addCopyRow=function(){
   var box=document.getElementById("copyRows");
@@ -902,9 +902,9 @@ function dayFormHTML(d,isNew,weekN){
   h+='<div class="field"><label>Blocchi di testo da copiare (script, caption, primo commento…)</label>'+copyEditorRows(d.copy||[])+'</div>';
   h+='<div class="field"><label>Stories del giorno — una per riga</label><textarea id="f-stories" placeholder="Una storia per riga" style="min-height:90px">'+esc((d.stories||[]).join("\n"))+'</textarea></div>';
   h+='<div class="field"><label>Checklist — una voce per riga</label><textarea id="f-tasks" placeholder="Una voce per riga" style="min-height:90px">'+esc((d.tasks||[]).join("\n"))+'</textarea><div class="help">Se la lasci vuota, uso una checklist standard.</div></div>';
-  h+='<button class="btn-pri" onclick="__sp.saveDay(\''+(d.id||"")+'\','+(isNew?"true":"false")+','+(weekN===null?"null":weekN)+')">Salva</button>';
-  if(!isNew) h+='<button class="btn-del" onclick="__sp.deleteDay(\''+d.id+'\')">Elimina questo contenuto</button>';
-  h+='<button class="btn-sec" onclick="__sp.closeSheet()">Annulla</button>';
+  h+='<button class="btn-pri" data-act="saveDay" data-arg="'+(d.id||"")+'" data-new="'+(isNew?"1":"0")+'" data-week="'+(weekN===null?"":weekN)+'">Salva</button>';
+  if(!isNew) h+='<button class="btn-del" data-act="deleteDay" data-arg="'+d.id+'">Elimina questo contenuto</button>';
+  h+='<button class="btn-sec" data-act="closeSheet">Annulla</button>';
   return h;
 }
 
@@ -967,8 +967,8 @@ function openNewWeek(){
   h+='<div class="field"><label>Titolo</label><input id="w-title" placeholder="es. Costruzione community"></div>';
   h+='<div class="field"><label>Obiettivo della settimana</label><textarea id="w-goal" placeholder="A cosa serve questa settimana"></textarea></div>';
   h+='<div class="field"><label>Hashtag della settimana</label><textarea id="w-hash" placeholder="#spadanocoaching #naturalbb ..."></textarea></div>';
-  h+='<button class="btn-pri" onclick="__sp.saveWeek()">Crea settimana</button>';
-  h+='<button class="btn-sec" onclick="__sp.closeSheet()">Annulla</button>';
+  h+='<button class="btn-pri" data-act="saveWeek">Crea settimana</button>';
+  h+='<button class="btn-sec" data-act="closeSheet">Annulla</button>';
   openSheetHTML(h);
 }
 window.__sp.saveWeek=function(){
@@ -986,12 +986,12 @@ function openMenu(){
   h+='<div class="field"><label>Titolo del piano</label><input id="m-title" value="'+esc(c.meta.title)+'"></div>';
   h+='<div class="field"><label>Sottotitolo (periodo)</label><input id="m-sub" value="'+esc(c.meta.subtitle)+'"></div>';
   h+='<div class="field"><label>Riga «Mappa trigger»</label><textarea id="m-trig" style="min-height:70px">'+esc(c.meta.triggers.replace(/<\/?b>/g,"*"))+'</textarea><div class="help">Usa *asterischi* per il grassetto.</div></div>';
-  h+='<button class="btn-pri" onclick="__sp.saveMeta()">Salva intestazione</button>';
-  h+='<button class="btn-sec" onclick="__sp.exportData()">⬇︎ Esporta tutti i contenuti (backup)</button>';
-  h+='<button class="btn-sec" onclick="document.getElementById(\'importFile\').click()">⬆︎ Importa da backup</button>';
-  h+='<input type="file" id="importFile" accept="application/json" style="display:none" onchange="__sp.importData(this)">';
-  h+='<button class="btn-del" onclick="__sp.factoryReset()">Ripristina il piano originale (v6)</button>';
-  h+='<button class="btn-sec" onclick="__sp.closeSheet()">Chiudi</button>';
+  h+='<button class="btn-pri" data-act="saveMeta">Salva intestazione</button>';
+  h+='<button class="btn-sec" data-act="exportData">⬇︎ Esporta tutti i contenuti (backup)</button>';
+  h+='<button class="btn-sec" data-act="pickImport">⬆︎ Importa da backup</button>';
+  h+='<input type="file" id="importFile" accept="application/json" style="display:none" data-chg="import">';
+  h+='<button class="btn-del" data-act="factoryReset">Ripristina il piano originale (v6)</button>';
+  h+='<button class="btn-sec" data-act="closeSheet">Chiudi</button>';
   openSheetHTML(h);
 }
 window.__sp.openMenu=openMenu;
@@ -1024,6 +1024,52 @@ window.__sp.factoryReset=function(){
   st().content=deepClone(window.__SEED); save(); closeSheet(); render(); toast("Piano originale ripristinato");
 };
 window.__setState=function(s){ window.__replaceState(s); };
+
+// ---------- DELEGA EVENTI (sostituisce gli onclick inline) ----------
+// Un solo listener per tutti i click: legge data-act e data-arg dall'elemento.
+document.addEventListener("click", function(e){
+  var t = e.target.closest("[data-act]");
+  if(!t) return;
+  var act = t.getAttribute("data-act");
+  var arg = t.getAttribute("data-arg");
+  var sp = window.__sp;
+  switch(act){
+    case "toggle": sp.toggle(arg); break;
+    case "toggleDay": sp.toggleDay(arg); break;
+    case "toggleRetro": sp.toggleRetro(); break;
+    case "copy": sp.copy(t); break;
+    case "tab": sp.tab(arg); break;
+    case "editDay": sp.editDay(arg); break;
+    case "deleteDay": sp.deleteDay(arg); break;
+    case "newDay": sp.newDay(parseInt(arg,10)); break;
+    case "newWeek": sp.newDay(null); break;
+    case "openMenu": sp.openMenu(); break;
+    case "reset": sp.reset(); break;
+    case "addCopyRow": sp.addCopyRow(); break;
+    case "removeCopyRow": var row=t.closest(".copy-list-item"); if(row) row.remove(); break;
+    case "closeSheet": sp.closeSheet(); break;
+    case "exportData": sp.exportData(); break;
+    case "factoryReset": sp.factoryReset(); break;
+    case "saveMeta": sp.saveMeta(); break;
+    case "saveWeek": sp.saveWeek(); break;
+    case "pickImport": var fi=document.getElementById("importFile"); if(fi) fi.click(); break;
+    case "saveDay":
+      sp.saveDay(arg||"", t.getAttribute("data-new")==="1", t.getAttribute("data-week")===""?null:parseInt(t.getAttribute("data-week"),10));
+      break;
+  }
+});
+// input (ratio, metriche) via delega
+document.addEventListener("input", function(e){
+  var t=e.target;
+  var inp=t.getAttribute && t.getAttribute("data-inp");
+  if(!inp) return;
+  if(inp==="ratio"){ window.__sp.setRatio(t.getAttribute("data-arg"), t.value); }
+  else if(inp==="metric"){ window.__sp.setMetric(t.getAttribute("data-arg"), t.getAttribute("data-arg2"), t.value); }
+});
+// change (import file) via delega
+document.addEventListener("change", function(e){
+  if(e.target.getAttribute && e.target.getAttribute("data-chg")==="import"){ window.__sp.importData(e.target); }
+});
 
 // ---------- BOOT ----------
 document.getElementById("fab").onclick=function(){
